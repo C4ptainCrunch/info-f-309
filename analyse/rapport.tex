@@ -9,9 +9,40 @@
 \maketitle
 
 \section{Introduction}
-\section{Descriptif}
-\section{Comparaison des alternatives}
-\section{Mise en oeuvre}
+On veut compiler du \LaTeX qui n'est pas sur.
 
+\section{Descriptif}
+
+un descriptif détaillé du sujet traité et des choix faits (quoi, pourquoi, comment)
+
+Le service de compilation LaTeX sera hébergé sur des machines séparées des serveurs web et de conversion pdf vers image pour des raisons de sécurité, d'isolation et parce que les machines assurant ces services sont déjà sufisement utilisées.
+Pour assurer la communication entre les serveurs web qui reçoivent les archives .zip contenant le \LaTeX et les serveurs de compilation nous utiliserons le système déjà utilisé ailleurs dans l'application : Celery (http://www.celeryproject.org/); il s'agit d'une queue de jobs distribuée qui permet à des scripts qui tournent pendant très peu de temps (le temps d'une requête web) d'emmetre l'ordre d'effectuer une tache longue et complexe hors du cycle requête-réponse d'HTTP.
+
+Les workers Celery créeront une BSDjail par tache de compilation puis y copieront les sources \LaTeX avant de la démarrer et d'y exécuter
+
+
+\section{Comparaison des alternatives}
+Comme alternative aux BSDjails, nous aurions pu utiliser des containeurs comme docker et lxd.
+Nous ne l'avons pas fait car ils ont tous les deux des problèmes de sécurités. En effet, nous avons réussi a eteindre la machine hote en faisant un shutdown dans un lxc et docker est connu pour etre vulnérable (https://blog.docker.com/2014/06/docker-container-breakout-proof-of-concept-exploit/). De plus (parler des priv escaladations).
+
+Nous n'utilison pas la virtualisation (kvm) pusique les machines virtuelles sont fort lourdes. En effet, nous devrons lancer une nouvelle instance a chaque compilation puisque nous ne voulons point compiler un document \LaTeX dans une vm qui fut compromise par une compilation précedente.
+Pour utiliser kvm, nous avons aussi besoin des instruction de virtualisation qui ne sont pas disponibles sur nos serveurs.
+
+
+Ce choix d'utiliser des BSDjails nous imposant dès lors une distribution BSD, nous avons décider de nous diriger vers celles orientées serveurs les plus connues,
+c'est à dire FreeBSD, OpenBSD, NetBSD, DragonFlyBSD.
+Notre choix s'est porté immédiatement sur OpenBSD, une distribution dont tous les réglages par défaut sont orientés vers une sécurité maximale pour un serveur. Tous les autres systèmes peuvent être également utilisés de façon aussi sûre, mais ils ne sont pas conçus pour cela par défaut:
+    \begin{itemize}
+    \item FreeBSD est un système d'exploitation multi-usage pour tout types d'utilisation, nous aurions dès lors pu l'utiliser aussi pour notre serveur, mais il nous aurait fallut plus de temps afin de la configurer pour avoir autant de sécurité que sur OpenBSD;
+    \item NetBSD a été conçu afin de tourner sur n'importe quel système, du pc de bureau à la console de jeu en passant par le grille-pain. À nouveau, il nous aurait été possible de l'utiliser mais nous aurions également dû passer du temps à le configurer.
+    \item DragonFlyBSD
+    \end{itemize}
+(comparaison de distro LaTeX: http://tex.stackexchange.com/questions/239199/LaTeX-distributions-what-are-their-main-differences)
+
+\section{Mise en oeuvre}
+[serveur supplémentaire avec openbsd, une distribution LaTeX (texlive?) et un logiciel antivirus (clamav?)]
+Il faudra investir dans un nouveau serveur, sur lequel nous installerons (*bsd). Ceci fait, nous installerons une distribution \LaTeX et le logiciel antivirus.
+Nous configurerons par la suite notre Celery et implémenterons nos scripts.
 
 \end{document}
+
