@@ -84,29 +84,29 @@ Voici les différentes alternatives que nous avons sélectionnées :
     \item{OpenVZ}
 \end{itemize}
 
-Nous n'avons pas retenu Docker car c'est une solution assez jeune et qu'il n'est pas certain qu'un Docker soit suffisamment sur : la documentation officielle recommande de ne pas faire tourner de processus dont on a pas confiance en root.
+Nous n'avons pas retenu Docker car c'est une solution assez jeune et qu'il n'est pas certain qu'un Docker soit suffisamment sûr : la documentation officielle recommande de ne pas faire tourner de processus dont on a pas confiance en root.
 
-LXC et OpenVZ sont quant à eux surs.
+LXC et OpenVZ sont quant à eux considérés comme sûrs.
 Cependant, leur défaut par rapport aux BSDJails et au Chroot Linux est que le conteneur comporte un système complet, ce qui utilise plus de ressources que nécéssaire.
 De plus, OpenVZ n'est plus maintenu\footnote{La dernière version date d'octobre 2011}.
 
-\subsection{Chroot et BSD Jails}
+\subsection{Isolation de processus}
 
-Il nous reste donc à analyser les Chroot sous GNU/Linux et les Jail BSD.
-Les deux systèmes semblent être les plus légers qu'il existe sur le marché pour isoler des processus.
+Il nous reste donc à analyser les techniques d'isolation de processus que sont Chroot sous GNU/Linux et les Jail sous FreeBSD.
+Les deux méthodes semblent être les plus légères qu'il existe sur le marché pour isoler des tâches en lesquelles nous n'avons pas confiance.
 
-Les Chroot Linux (comme Docker) ne sont cependant pas suffisamment sûrs pour l'utilisation que nous voulons en faire\footnote{Il est possible pour un processus root dans un Chroot d'en sortir et d'atteindre l'hote.}.
+Les Chroot Linux ne sont cependant pas suffisamment sûrs et cloisonnés pour l'utilisation que nous voulons en faire\footnote{Il est possible pour un processus root dans un Chroot d'en sortir et d'atteindre l'hote.}.
 
 Les Jails BSD sont donc notre seule option dont le niveau d'isolation est suffisant pour nos besoins et dont la consommation en ressources est suffisamment faible.
 
 En effet, les Jails ont été conçues expressément dans le but d'isoler des processus et sont légères de par le fait qu'une jail ne contient pas un système complet.
 
 \subsection{Autres composants}
-L'utilisation de ces Jails BSD force notre choix de distribution vers FreeBSD ou l'une de celles basées sur cette dernière. Nous retiendrons cependant notre choix sur l'originale, les autres étant principalement des surcouches apportant l'installation par défaut de différents logiciels. Aucune de ces distributions n'étant orientée vers la sécurité, nous nous tiendrons à FreeBSD.
+L'utilisation de ces Jails BSD force notre choix de distribution vers FreeBSD ou l'une de celles basées sur cette dernière. Nous avons donc arrêté cependant notre choix sur l'originale, les autres étant principalement des surcouches apportant l'installation par défaut de différents logiciels. Aucune de ces distributions n'étant orientée vers la sécurité, il n'y a pas d'intérêt pour nous à utiliser une de ces sur-couches.
 
-Pour la distribution \LaTeX, l'utilisation d'une BSD nous laisse peu de choix: il n'existe que la distribution texlive, que nous utiliserons dès lors.
+Pour la distribution \LaTeX, l'utilisation d'une BSD nous laisse peu de choix: il n'existe que la distribution texlive, que nous avons donc choisie.
 
-Enfin, le logiciel antivirus choisi sera Clam AntiVirus.
+Enfin, le logiciel antivirus que nous  sera Clam AntiVirus.
 En effet, il est l'un des seuls à être à la fois gratuit et libre, ce qui suit la philosophie de notre start-up.
 Il est de plus très largement utilisé, ce qui renforce notre confiance en son développement et ses corrections rapides lors de rares failles de sécurité détectées.
 Sa forte utilisation nous permettra également des recherches aisées d'aides sur l'Internet en cas de soucis.
