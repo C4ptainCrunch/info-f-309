@@ -18,35 +18,37 @@
 Une jeune start-up, HubDoc.be, développe un site-web permettant à des étudiants d'uploader des fichiers pdf de syllabus et d'anciens d'examens.
 La valeur ajoutée de cette start-up (en plus d'héberger ces fichiers) est de proposer un aperçu en ligne de ces fichiers pour les lire rapidement sans les télécharger.
 
-HubDoc.be aimerait proposer aux étudiants utilisant leur plate-forme de pouvoir uploader leurs résumés écrits en \LaTeX et HubDoc.be se charge de compiler ces différents documents a partir des sources.
+HubDoc aimerait proposer aux étudiants utilisant leur plate-forme de pouvoir uploader leurs résumés écrits en \LaTeX et HubDoc se charge de compiler ces différents documents a partir des sources.
 
-HubDoc.be est une jeune entreprise de 3 employés.
+HubDoc est une jeune entreprise de 3 employés.
 Leur produit est développé en Python avec le framework Django.
 Actuellement elle dispose de deux serveurs GNU/Linux (un serveur de production et un serveur de réserve en cas de panne) dont l'utilisation est relativement élevée.
-HubDoc.be s'attend à une croissance assez importante dans les prochains mois;
+
+HubDoc s'attend à une croissance assez importante dans les prochains mois;
 elle s'attend donc à devoir faire fonctionner son application sur plusieurs machines pour supporter la charge.
 
 
 \section{Introduction}
 
 Nos utilisateurs aimeraient pouvoir uploader des archives (.zip, .tar, ..) contenant des sources \LaTeX via notre interface web et que notre service puisse les compiler en .pdf à la vollée.
+
 Cependant, la compilation de fichiers \LaTeX comporte des risques de sécurité si l'auteur de ces fichiers n'est pas digne de confiance.
 En effet, il existe une commande \LaTeX qui permet d'exécuter des commandes shell.
-Cette vulnérabilité pourrait permettre à un utilisateur malicieux de prendre le contrôle de nos serveurs ou d'exposer les données des autres utilisateurs
+Cette vulnérabilité pourrait permettre à un utilisateur malicieux de prendre le contrôle de nos serveurs ou d'exposer les données des autres utilisateurs.
 
 \section{Descriptif}
 
-La compilation de fichiers \LaTeX n'étant pas sûre\footnote{Même en désactivant la commande permettant d'exécuter un shell, il existe d'autres moyens d'exécuter du code arbitraire depuis la compilation d'un fichier. https://0day.work/hacking-with-LaTeX/ en est un example.}, nous isolerons chaque compilation dans une BSDjail séparée.
+La compilation de fichiers \LaTeX n'étant pas sûre \footnote{Même en désactivant la commande permettant d'exécuter un shell, il existe d'autres moyens d'exécuter du code arbitraire depuis la compilation d'un fichier. https://0day.work/hacking-with-LaTeX/ en est un example.}, nous devrons isoler les compilations entre elles et du reste du système.
 
 Le service de compilation \LaTeX sera hébergé sur des machines séparées du serveur web et de conversion pdf vers image pour des raisons de sécurité, d'isolation et parce que les machines assurant ces services sont déjà suffisamment utilisées.
 
 Pour assurer la communication entre les serveurs web qui reçoivent les archives .zip contenant le \LaTeX et les serveurs de compilation nous utiliserons un système déjà utilisé ailleurs dans l'application :
 Celery\footnote{http://www.celeryproject.org/}.
 
-Il s'agit d'une file de tâches distribuée qui permet à des scripts qui tournent pendant très peu de temps (le temps d'une requête web) d'émettre l'ordre d'effectuer une tache longue et complexe hors du cycle requête-réponse d'HTTP.
+Il s'agit d'une file de tâches distribuée qui permet à des scripts qui tournent pendant peu de temps (le temps d'une requête web) d'émettre l'ordre d'effectuer une tache longue et complexe hors du cycle requête-réponse d'HTTP.
 Celery sera donc responsable de démarrer la compilation des sources \LaTeX dans un environnement sur et isolé.
 
-%TODO : antivirus
+De plus, Celery sera aussi chargé d'effectuer une analyse anti-virus du .pdf produit pour éviter qu'un pdf produit par nos serveurs ne conienne un logiciel malveillant.
 
 
 \section{Comparaison des alternatives}
