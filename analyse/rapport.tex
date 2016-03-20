@@ -16,17 +16,17 @@
 
 \section{Contexte}
 
-Une jeune start-up, HubDoc.be, développe un site-web permettant à des étudiants d'uploader des fichiers pdf de syllabus et d'anciens d'examens.
-La valeur ajoutée de cette start-up (en plus d'héberger ces fichiers) est de proposer un aperçu en ligne de ces fichiers pour les lire rapidement sans les télécharger.
+Une jeune startup, HubDoc.be, développe un site-web permettant à des étudiants d'uploader des fichiers pdf de syllabus et d'anciens examens.
+La valeur ajoutée de cette startup (en plus d'héberger ces fichiers) est de proposer un aperçu en ligne de ces fichiers pour les lire rapidement sans les télécharger.
 
-HubDoc aimerait proposer aux étudiants utilisant leur plate-forme de pouvoir uploader leurs résumés écrits en \LaTeX et HubDoc se charge de compiler ces différents documents à partir des sources.
+HubDoc aimerait proposer aux étudiants utilisant leur plateforme de pouvoir uploader leurs résumés écrits en \LaTeX et se chargerait de compiler ces différents documents à partir des sources.
 
 HubDoc est une jeune entreprise de 3 employés.
 Leur produit est développé en Python avec le framework Django.
 Actuellement, elle dispose de deux serveurs GNU/Linux (un serveur de production et un serveur de réserve en cas de panne) dont l'utilisation est relativement élevée.
 
 HubDoc s'attend à une croissance assez importante dans les prochains mois;
-elle s'attend donc à devoir faire fonctionner son application sur plusieurs machines pour supporter la charge.
+elle prévoit donc de devoir faire fonctionner son application sur plusieurs machines pour supporter la charge.
 
 
 \section{Introduction}
@@ -74,7 +74,7 @@ De plus, le niveau d'isolation que garantissent les machines virtuelles est trop
 \subsection{Conteneurs}
 Le domaine des conteneurs est plus récent que celui de la virtualisation et donc moins développé (quoiqu'en pleine expansion).
 
-Le conteneurs partagent eux aussi une caractéristique commune : ils ont été créés pour être légers et offrir un niveau d'isolation moindre\footnote{Par exemple, la plus part partagent leur noyau avec le système hôte. (Ce qui ne nous pose pas problème ici)}.
+Le conteneurs partagent eux aussi une caractéristique commune : ils ont été créés pour être légers et offrir un niveau d'isolation moindre\footnote{Par exemple, la plupart partagent leur noyau avec le système hôte. (Ce qui ne nous pose pas problème ici)}.
 
 Voici les différentes alternatives que nous avons sélectionnées :
 
@@ -92,10 +92,10 @@ De plus, OpenVZ n'est plus maintenu\footnote{La dernière version date d'octobre
 
 \subsection{Isolation de processus}
 
-Il nous reste donc à analyser les techniques d'isolation de processus que sont Chroot sous GNU/Linux et les Jail sous FreeBSD.
+Il nous reste donc à analyser les techniques d'isolation de processus que sont Chroot sous GNU/Linux et les Jails sous FreeBSD.
 Les deux méthodes semblent être les plus légères existant sur le marché pour isoler des tâches en lesquelles nous n'avons pas confiance.
 
-Les Chroot Linux ne sont cependant pas suffisamment sûrs et cloisonnés pour l'utilisation que nous voulons en faire\footnote{Il est possible pour un processus root dans un Chroot d'en sortir et d'atteindre l'hote.}.
+Les Chroot Linux ne sont cependant pas suffisamment sûrs et cloisonnés pour l'utilisation que nous voulons en faire\footnote{Il est possible pour un processus root dans un Chroot d'en sortir et d'atteindre l'hôte.}.
 
 Les Jails BSD sont donc notre seule option dont le niveau d'isolation est suffisant pour nos besoins et dont la consommation en ressources est suffisamment faible.
 
@@ -103,11 +103,11 @@ En effet, les Jails ont été conçues expressément dans le but d'isoler des pr
 
 \subsection{Distribution utilisée}
 
-L'utilisation de ces Jails BSD force notre choix de distribution vers FreeBSD ou l'une de celles basées sur cette dernière. Nous avons arrêté cependant notre choix sur l'originale, les autres étant principalement des surcouches apportant l'installation par défaut de différents logiciels. Aucune de ces distributions n'étant orientée vers la sécurité, il n'y a aucun intérêt pour nous à utiliser une de ces surcouches.
+L'utilisation de ces Jails BSD force notre choix de distribution vers FreeBSD ou l'une de celles basées sur cette dernière. Nous avons cependant arrêté notre choix sur l'originale, les autres étant principalement des surcouches apportant l'installation par défaut de différents logiciels. Aucune de ces distributions n'étant orientée vers la sécurité, il n'y a aucun intérêt pour nous à utiliser une de ces surcouches.
 
 \subsection{Autres composants}
 
-Pour la distribution \LaTeX, l'utilisation d'une BSD nous laisse peu de choix: il n'existe que la distribution texlive, que nous avons donc choisie.
+Pour la distribution \LaTeX, l'utilisation d'une BSD nous laisse peu de choix: il n'existe que la distribution TexLive, que nous avons donc choisie.
 
 Enfin, le dernier logiciel que nous devons choisir est l'antivirus. Il existe des milliers d'antivirus sur le marché. Cependant, étant donné notre budget limité et notre infrastructure, nous limiterons notre choix aux solutions gratuites et disponibles sur des systèmes POSIX :
 \begin{itemize}
@@ -116,20 +116,15 @@ Enfin, le dernier logiciel que nous devons choisir est l'antivirus. Il existe de
     \item{Sophos}
 \end{itemize}
 
-Nous avons décidé de retenir ClamAV : il est développé depuis des années, est largement utilisé et soutenu par Cisco, une entreprise de confiance et de grande envergure. De plus, contrairement aux deux autres, il est à la fois gratuit et libre, ce que notre start-up valorise.
+Nous avons décidé de retenir ClamAV : il est développé depuis des années, est largement utilisé et est soutenu par Cisco, une entreprise de confiance et de grande envergure. De plus, contrairement aux deux autres, il est à la fois gratuit et libre, ce que notre startup valorise.
 
 \section{Mise en œuvre}
 Pour mettre en place ce système, nous allons commencer par installer un nouveau serveur sous FreeBSD avec la stack \LaTeX et ClamAV installée.
 
-Une fois ceci fais, nous allons créer des workers Celery dont le but sera d'attendre des des taches de demandes de compilation depuis le serveur de production.
+Une fois ceci fais, nous allons créer des workers Celery dont le but sera d'attendre des tâches de demandes de compilation depuis le serveur de production.
 Lors de la réception d'une de ces requêtes, le worker créera automatiquement une nouvelle BSDjail avec les sources \LaTeX nécessaires à la compilation du document et la lancera.
 
-Lorsque la compilation aura terminée, le worker extraira le fichier compilé de l'arborescence de la jail et le fera analyser par un antivirus (ici ClamAV) afin d'eviter d'envoyer des maliciels à nos clients.
-
-[serveur supplémentaire avec openbsd, une distribution \LaTeX (texlive?) et un logiciel antivirus (clamav?)]
-Il faudra investir dans un nouveau serveur, sur lequel nous installerons (*bsd).
-Ceci fait, nous installerons une distribution \LaTeX et le logiciel antivirus.
-Nous configurerons par la suite notre Celery et implémenterons nos scripts.
+Lorsque la compilation sera terminée, le worker extraira le fichier compilé de l'arborescence de la Jail et le fera analyser par un antivirus (ici ClamAV) afin d'éviter d'envoyer des maliciels à nos clients.
 
 \end{document}
 
