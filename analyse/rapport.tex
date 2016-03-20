@@ -5,6 +5,11 @@
 \author{Anthony \textsc{Caccia} \and Romain \textsc{Fontaine} \and Nikita \textsc{Marchant} }
 \date{}
 \title{\textsc{INFO-F-309 : Administration Système} Projet : Rapport d'analyse}
+
+\setlength{\parindent}{1.5em}
+\setlength{\parskip}{1em}
+% \renewcommand{\baselinestretch}{1.5}
+
 \begin{document}
 \maketitle
 
@@ -34,9 +39,11 @@ Cette vulnérabilité pourrait permettre à un utilisateur malicieux de prendre 
 La compilation de fichiers \LaTeX n'étant pas sûre\footnote{Même en désacivant la commande permettant d'exécuter un shell, il existe d'autres moyens d'exécuter du code arbitraire depuis la compilation d'un fichier. https://0day.work/hacking-with-LaTeX/ en est un example.}, nous isolerons chaque compilation dans une BSDjail séparée.
 
 Le service de compilation \LaTeX sera hébergé sur des machines séparées du serveur web et de conversion pdf vers image pour des raisons de sécurité, d'isolation et parce que les machines assurant ces services sont déjà suffisamment utilisées.
-Pour assurer la communication entre les serveurs web qui reçoivent les archives .zip contenant le \LaTeX et les serveurs de compilation nous utiliserons un système déjà utilisé ailleurs dans l'application :
-Celery (http://www.celeryproject.org/); il s'agit d'une queue de jobs distribuée qui permet à des scripts qui tournent pendant très peu de temps (le temps d'une requête web) d'emmetre l'ordre d'effectuer une tache longue et complexe hors du cycle requête-réponse d'HTTP.
 
+Pour assurer la communication entre les serveurs web qui reçoivent les archives .zip contenant le \LaTeX et les serveurs de compilation nous utiliserons un système déjà utilisé ailleurs dans l'application :
+Celery\footnote{http://www.celeryproject.org/}.
+
+Il s'agit d'une file de tâches distribuée qui permet à des scripts qui tournent pendant très peu de temps (le temps d'une requête web) d'emmetre l'ordre d'effectuer une tache longue et complexe hors du cycle requête-réponse d'HTTP.
 Celery sera donc responsable de démarrer la compilation des sources \LaTeX dans un environnement sur et isolé.
 
 
@@ -44,7 +51,9 @@ Celery sera donc responsable de démarrer la compilation des sources \LaTeX dans
 Pour isoler l'exécution du compilateur du reste du système ainsi que des autres compilations, nous avons le choix entre deux grandes techniques : la vistualisation ou la conteneurisation.
 
 \subsection{Virtualisation}
+
 Le marché de la virtualisation est fort développé et propose donc beaucoup d'alternatives. Nous en avons considéré plusieurs :
+
 \begin{itemize}
     \item{KVM}
     \item{Qemu}
@@ -61,21 +70,28 @@ De plus, le niveau d'isolation que garantissent les machines virtuelle est trop 
 \subsection{Conteneurs}
 Le domaine des conteneurs est plus récent que celui de la virtualisation et donc moins développé (quoiqu'en pleine expansion).
 
-Le conteneurs partagent eux aussi une caractéristique commune : ils ont été créés pour être légers et offir un niveau d'isolation moindre\footnote{La plus part partagent leur noyeau avec le système hote. (Ce qui ne nous pose pas problème ici)}
+Le conteneurs partagent eux aussi une caractéristique commune : ils ont été créés pour être légers et offir un niveau d'isolation moindre\footnote{Par exemple, la plus part partagent leur noyeau avec le système hote. (Ce qui ne nous pose pas problème ici)}.
+
+Voici les différentes alternatives que nous avons sélectionnées :
 
 \begin{itemize}
     \item{Docker}
-    \item{LXC}
-    \item{BSDJail}
     \item{Chroot linux}
     \item{OpenVZ}
 \end{itemize}
 
-Nous n'avons pas retenu LXC ni Docker car ils posent des problèmes de sécurité
-Nous ne l'avons pas fait car ils ont tous les deux des problèmes de sécurités.
-En effet, nous avons réussi a eteindre la machine hote en faisant un shutdown dans un lxc et docker est connu pour etre vulnérable (https://blog.docker.com/2014/06/docker-container-breakout-proof-of-concept-exploit/).
-De plus (parler des priv escaladations).
+Nous n'avons pas retenu Docker car c'est une solution assez jeune et qu'il n'est pas certain qu'un Docker soit suffisement sur : la documentation officielle recommande de ne pas faire tourner de processus dans on a pas confiance en root.
 
+LXC et OpenVZ sont quant à eux surs. Cependant, leur défaut par rapport aux BSDJails et au Chroot Linux est que le conteneur comporte un système complet, ce qui utilise plus de ressources que nécéssaire.
+
+\subsection{Chroot et BSD Jails}
+
+Il nous reste donc à analyser les Chroot sous GNU/Linux et les Jail BSD. Les deux systèmes semblent être les plus légers qu'il existe sur le marché pour isoler des processus.
+
+
+Les Chroot Linux (comme Docker) ne sont cependant pas suffisement surs pour l'utilisations que nous voulons en faire\footnote{Il est possible pour un processus root dans un Chroot d'en sortir et d'atteindre l'hote.}
+
+Les Jails BSD sont donc notre seule option dont le niveau d'isolation est suffisant pour nos besoins et dont la consommation en ressources est suffisement faible.
 
 Ce choix d'utiliser des BSDjails nous imposant dès lors une distribution BSD, nous avons décider de nous diriger vers celles orientées serveurs les plus connues,
 c'est à dire FreeBSD, OpenBSD, NetBSD, DragonFlyBSD.
