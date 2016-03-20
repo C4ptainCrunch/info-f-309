@@ -19,11 +19,11 @@
 Une jeune start-up, HubDoc.be, développe un site-web permettant à des étudiants d'uploader des fichiers pdf de syllabus et d'anciens d'examens.
 La valeur ajoutée de cette start-up (en plus d'héberger ces fichiers) est de proposer un aperçu en ligne de ces fichiers pour les lire rapidement sans les télécharger.
 
-HubDoc aimerait proposer aux étudiants utilisant leur plate-forme de pouvoir uploader leurs résumés écrits en \LaTeX et HubDoc se charge de compiler ces différents documents a partir des sources.
+HubDoc aimerait proposer aux étudiants utilisant leur plate-forme de pouvoir uploader leurs résumés écrits en \LaTeX et HubDoc se charge de compiler ces différents documents à partir des sources.
 
 HubDoc est une jeune entreprise de 3 employés.
 Leur produit est développé en Python avec le framework Django.
-Actuellement elle dispose de deux serveurs GNU/Linux (un serveur de production et un serveur de réserve en cas de panne) dont l'utilisation est relativement élevée.
+Actuellement, elle dispose de deux serveurs GNU/Linux (un serveur de production et un serveur de réserve en cas de panne) dont l'utilisation est relativement élevée.
 
 HubDoc s'attend à une croissance assez importante dans les prochains mois;
 elle s'attend donc à devoir faire fonctionner son application sur plusieurs machines pour supporter la charge.
@@ -31,7 +31,7 @@ elle s'attend donc à devoir faire fonctionner son application sur plusieurs mac
 
 \section{Introduction}
 
-Nos utilisateurs aimeraient pouvoir uploader des archives (.zip, .tar, ..) contenant des sources \LaTeX via notre interface web et que notre service puisse les compiler en .pdf à la vollée.
+Nos utilisateurs aimeraient pouvoir uploader des archives (.zip, .tar, ..) contenant des sources \LaTeX via notre interface web et que notre service puisse les compiler en .pdf à la volée.
 
 Cependant, la compilation de fichiers \LaTeX comporte des risques de sécurité si l'auteur de ces fichiers n'est pas digne de confiance.
 En effet, il existe une commande \LaTeX qui permet d'exécuter des commandes shell.
@@ -39,7 +39,7 @@ Cette vulnérabilité pourrait permettre à un utilisateur malicieux de prendre 
 
 \section{Descriptif}
 
-La compilation de fichiers \LaTeX n'étant pas sûre \footnote{Même en désactivant la commande permettant d'exécuter un shell, il existe d'autres moyens d'exécuter du code arbitraire depuis la compilation d'un fichier.  \url{https://0day.work/hacking-with-LaTeX/} en est un example.}, nous devrons isoler les compilations entre elles et du reste du système.
+La compilation de fichiers \LaTeX n'étant pas sûre \footnote{Même en désactivant la commande permettant d'exécuter un shell, il existe d'autres moyens d'exécuter du code arbitraire depuis la compilation d'un fichier.  \url{https://0day.work/hacking-with-LaTeX/} en est un example.}, nous devrons isoler les compilations du reste du système.
 
 Le service de compilation \LaTeX sera hébergé sur des machines séparées du serveur web et de conversion pdf vers image pour des raisons de sécurité, d'isolation et parce que les machines assurant ces services sont déjà suffisamment utilisées.
 
@@ -47,9 +47,9 @@ Pour assurer la communication entre les serveurs web qui reçoivent les archives
 Celery\footnote{\url{http://www.celeryproject.org/}}.
 
 Il s'agit d'une file de tâches distribuée qui permet à des scripts qui tournent pendant peu de temps (le temps d'une requête web) d'émettre l'ordre d'effectuer une tache longue et complexe hors du cycle requête-réponse d'HTTP.
-Celery sera donc responsable de démarrer la compilation des sources \LaTeX dans un environnement sur et isolé.
+Celery sera donc responsable de démarrer la compilation des sources \LaTeX dans un environnement sûr et isolé.
 
-De plus, Celery sera aussi chargé d'effectuer une analyse anti-virus du .pdf produit pour éviter qu'un pdf produit par nos serveurs ne conienne un logiciel malveillant.
+De plus, Celery sera aussi chargé d'effectuer une analyse antivirus du .pdf produit pour éviter qu'ils ne contiennent des logiciels malveillants.
 
 \section{Comparaison des alternatives}
 Pour isoler l'exécution du compilateur du reste du système ainsi que des autres compilations, nous avons le choix entre plusieurs techniques : la virtualisation, les conteneurs ou l'isolation de processus.
@@ -67,14 +67,14 @@ Le marché de la virtualisation est fort développé et propose donc beaucoup d'
 
 Nous n'en avons cependant retenu aucune. En effet, toutes ces solutions partagent un désavantage commun : une machine virtuelle est fort lourde.
 
-Nous pourrions potentiellement compiler des dizaines de documents en parallèle et l'empreinte mémoire ainsi que le relativement ``long'' temps de démarrage d'une machine virtuelle risqueraient de poser problème.
+Nous pourrions potentiellement compiler des dizaines de documents en parallèle, mais l'empreinte mémoire ainsi que le relativement ``long'' temps de démarrage d'une machine virtuelle risqueraient de poser problème.
 
-De plus, le niveau d'isolation que garantissent les machines virtuelle est trop important pour l'utilisation que nous en ferions.
+De plus, le niveau d'isolation que garantissent les machines virtuelles est trop important pour l'utilisation que nous en ferions.
 
 \subsection{Conteneurs}
 Le domaine des conteneurs est plus récent que celui de la virtualisation et donc moins développé (quoiqu'en pleine expansion).
 
-Le conteneurs partagent eux aussi une caractéristique commune : ils ont été créés pour être légers et offrir un niveau d'isolation moindre\footnote{Par exemple, la plus part partagent leur noyeau avec le système hote. (Ce qui ne nous pose pas problème ici)}.
+Le conteneurs partagent eux aussi une caractéristique commune : ils ont été créés pour être légers et offrir un niveau d'isolation moindre\footnote{Par exemple, la plus part partagent leur noyau avec le système hôte. (Ce qui ne nous pose pas problème ici)}.
 
 Voici les différentes alternatives que nous avons sélectionnées :
 
@@ -87,32 +87,34 @@ Voici les différentes alternatives que nous avons sélectionnées :
 Nous n'avons pas retenu Docker car c'est une solution assez jeune et qu'il n'est pas certain qu'un Docker soit suffisamment sûr : la documentation officielle recommande de ne pas faire tourner de processus dont on a pas confiance en root.
 
 LXC et OpenVZ sont quant à eux considérés comme sûrs.
-Cependant, leur défaut par rapport aux BSDJails et au Chroot Linux est que le conteneur comporte un système complet, ce qui utilise plus de ressources que nécéssaire.
+Cependant, leur défaut par rapport aux BSDJails et au Chroot Linux est que le conteneur comporte un système complet, ce qui utilise plus de ressources que nécessaire.
 De plus, OpenVZ n'est plus maintenu\footnote{La dernière version date d'octobre 2011}.
 
 \subsection{Isolation de processus}
 
 Il nous reste donc à analyser les techniques d'isolation de processus que sont Chroot sous GNU/Linux et les Jail sous FreeBSD.
-Les deux méthodes semblent être les plus légères qu'il existe sur le marché pour isoler des tâches en lesquelles nous n'avons pas confiance.
+Les deux méthodes semblent être les plus légères existant sur le marché pour isoler des tâches en lesquelles nous n'avons pas confiance.
 
 Les Chroot Linux ne sont cependant pas suffisamment sûrs et cloisonnés pour l'utilisation que nous voulons en faire\footnote{Il est possible pour un processus root dans un Chroot d'en sortir et d'atteindre l'hote.}.
 
 Les Jails BSD sont donc notre seule option dont le niveau d'isolation est suffisant pour nos besoins et dont la consommation en ressources est suffisamment faible.
 
-En effet, les Jails ont été conçues expressément dans le but d'isoler des processus et sont légères de par le fait qu'une jail ne contient pas un système complet.
+En effet, les Jails ont été conçues expressément dans le but d'isoler des processus et sont légères de par le fait qu'une Jail ne contient pas un système complet.
+
+\subsection{Distribution utilisée}
+
+L'utilisation de ces Jails BSD force notre choix de distribution vers FreeBSD ou l'une de celles basées sur cette dernière. Nous avons arrêté cependant notre choix sur l'originale, les autres étant principalement des surcouches apportant l'installation par défaut de différents logiciels. Aucune de ces distributions n'étant orientée vers la sécurité, il n'y a aucun intérêt pour nous à utiliser une de ces surcouches.
 
 \subsection{Autres composants}
-L'utilisation de ces Jails BSD force notre choix de distribution vers FreeBSD ou l'une de celles basées sur cette dernière. Nous avons donc arrêté cependant notre choix sur l'originale, les autres étant principalement des surcouches apportant l'installation par défaut de différents logiciels. Aucune de ces distributions n'étant orientée vers la sécurité, il n'y a pas d'intérêt pour nous à utiliser une de ces sur-couches.
 
 Pour la distribution \LaTeX, l'utilisation d'une BSD nous laisse peu de choix: il n'existe que la distribution texlive, que nous avons donc choisie.
 
-Enfin, le dernier logiciel que nous devons choisir est l'antivirus. Il existe des milliers d'antivirus sur le marché. Cependant, étant donné notre buget limité et notre infrastructure nous limiterons notre choix aux solutions gratuites et disponnibles sur des systèmes POSIX :
+Enfin, le dernier logiciel que nous devons choisir est l'antivirus. Il existe des milliers d'antivirus sur le marché. Cependant, étant donné notre budget limité et notre infrastructure, nous limiterons notre choix aux solutions gratuites et disponibles sur des systèmes POSIX :
 \begin{itemize}
     \item{ClamAV}
     \item{CIS}
     \item{Sophos}
 \end{itemize}
-
 
 Nous avons décidé de retenir ClamAV : il est développé depuis des années, est largement utilisé et soutenu par Cisco, une entreprise de confiance et de grande envergure. De plus, contrairement aux deux autres, il est à la fois gratuit et libre, ce que notre start-up valorise.
 
