@@ -118,8 +118,12 @@ Nous avons décidé de retenir ClamAV : il est développé depuis des années, e
 
 \section{Mise en oeuvre}
 
-Les workers Celery créeront une BSDjail par tache de compilation puis y copieront les sources \LaTeX avant de la démarrer et d'y exécuter le compilateur \LaTeX.
+Nous allons faire fonctionner le processus de compilation sur un second serveur sous FreeBSD.
+
+Celui-ci aura des workers Celery qui créeront une BSDjail par tache de compilation puis y copieront les sources \LaTeX avant de la démarrer et d'y exécuter le compilateur \LaTeX.
 Une fois que le compilateur aura fini de s'exécuter la jail s'arrêtera et la tache Celery extraira le fichier compilé de l'arborescence de la jail.
+
+Avant de renvoyer le pdf résultant au serveur de production, les workers analyserons le pdf avec ClamAV pour éviter d'envoyer des maliciels à nos clients.
 
 [serveur supplémentaire avec openbsd, une distribution \LaTeX (texlive?) et un logiciel antivirus (clamav?)]
 Il faudra investir dans un nouveau serveur, sur lequel nous installerons (*bsd).
