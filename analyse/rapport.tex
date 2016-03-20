@@ -8,40 +8,84 @@
 \begin{document}
 \maketitle
 
+\section{Contexte}
+
+Une jeune start-up HubDoc.be développe un site-web permettant à des étudiants d'uploader des fichiers pdf de syllabus et d'anciens d'examens.
+La valeur ajoutée de cette start-up (en plus d'héberger ces fichiers) est de proposer un aperçu en ligne de ces fichiers pour les lire rapidement sans les télécharger.
+Celle-ci trouverait fort intéressant de pouvoir compiler ces differents documents a partir des sources \LaTeX founie par les utilisateurs sans comprommettre son serveur.
+
+
 \section{Introduction}
-On veut compiler du \LaTeX qui n'est pas sur.
+
+Nos utilisateurs aimeraient pouvoir uploader des archives (.zip, .tar, ..) contenant des sources \LaTeX sur notre interface web et que notre service puisse les compiler en .pdf à la vollée.
+Cependant, la compilation de fichiers \LaTeX comporte des risques de sécurtié si l'auteur de ces fichiers n'est pas digne de confiance.
+En effet, il existe une commande \LaTeX qui permet d'exécuter des commandes shell.
+Cette vulnérabilité pourrait permettre à un utilisateur malicieux de prendre le contrôle de nos serveurs ou d'exposer publiquer les données des autres utilisateurs.
 
 \section{Descriptif}
 
-un descriptif détaillé du sujet traité et des choix faits (quoi, pourquoi, comment)
+La compilation de fichiers \LaTeX n'étant donc pas sûre\footnote{Même en désacivant la commande permettant d'exécuter un shell, il existe d'autres moyens d'exécuter du code arbitraire depuis la compilation d'un fichier. https://0day.work/hacking-with-LaTeX/ en est un example.}, nous isolerons chaque compilation dans une BSDjail séparée.
 
-Le service de compilation LaTeX sera hébergé sur des machines séparées des serveurs web et de conversion pdf vers image pour des raisons de sécurité, d'isolation et parce que les machines assurant ces services sont déjà sufisement utilisées.
-Pour assurer la communication entre les serveurs web qui reçoivent les archives .zip contenant le \LaTeX et les serveurs de compilation nous utiliserons le système déjà utilisé ailleurs dans l'application : Celery (http://www.celeryproject.org/); il s'agit d'une queue de jobs distribuée qui permet à des scripts qui tournent pendant très peu de temps (le temps d'une requête web) d'emmetre l'ordre d'effectuer une tache longue et complexe hors du cycle requête-réponse d'HTTP.
+Le service de compilation \LaTeX sera hébergé sur des machines séparées des serveurs web et de conversion pdf vers image pour des raisons de sécurité, d'isolation et parce que les machines assurant ces services sont déjà suffisamment utilisées.
+Pour assurer la communication entre les serveurs web qui reçoivent les archives .zip contenant le \LaTeX et les serveurs de compilation nous utiliserons le système déjà utilisé ailleurs dans l'application :
+Celery (http://www.celeryproject.org/); il s'agit d'une queue de jobs distribuée qui permet à des scripts qui tournent pendant très peu de temps (le temps d'une requête web) d'emmetre l'ordre d'effectuer une tache longue et complexe hors du cycle requête-réponse d'HTTP.
 
-Les workers Celery créeront une BSDjail par tache de compilation puis y copieront les sources \LaTeX avant de la démarrer et d'y exécuter
+Les workers Celery créeront une BSDjail par tache de compilation puis y copieront les sources \LaTeX avant de la démarrer et d'y exécuter le compilateur \LaTeX.
+Une fois que le compilateur aura fini de s'éxecuter la jail s'arrêtera et la tache Celery extraiera le fichier compilé de l'arborescence de la jail.
 
 
 \section{Comparaison des alternatives}
-Comme alternative aux BSDjails, nous aurions pu utiliser des containeurs comme docker et lxd.
-Nous ne l'avons pas fait car ils ont tous les deux des problèmes de sécurités. En effet, nous avons réussi a eteindre la machine hote en faisant un shutdown dans un lxc et docker est connu pour etre vulnérable (https://blog.docker.com/2014/06/docker-container-breakout-proof-of-concept-exploit/). De plus (parler des priv escaladations).
+Pour isoler l'exécution du compilateur du reste du système ainsi que des autres compilations,
+nous avions le choix de plusieurs technologies : La vistualisation ou la conteneurisation.
+Pour la virtualisation, il existe beaucoup d'outils ayant tous les mêmes avantages et inconvénients dans notre cas :
+\begin{enumerate}
+    \item{KVM}
+    \item{Qemu}
+    \item{Xen}
+    \item{Et bien d'autres}
+\end{enumerate}
 
-Nous n'utilison pas la virtualisation (kvm) pusique les machines virtuelles sont fort lourdes. En effet, nous devrons lancer une nouvelle instance a chaque compilation puisque nous ne voulons point compiler un document \LaTeX dans une vm qui fut compromise par une compilation précedente.
+Nous n'utilisons pas la virtualisation (kvm) pusique les machines virtuelles sont fort lourdes.
+En effet, nous devrons lancer une nouvelle instance a chaque compilation puisque nous ne voulons point compiler un document \LaTeX dans une vm qui fut compromise par une compilation précedente.
 Pour utiliser kvm, nous avons aussi besoin des instruction de virtualisation qui ne sont pas disponibles sur nos serveurs.
+
+
+Pour la conteneurisation, il existe aussi beaucoup d'alternatives. Les plus connues sont :
+\begin{enumerate}
+    \item{Docker}
+    \item{LXC}
+    \item{BSDJail}
+    \item{Chroot linux}
+    \item{OpenVZ}
+\end{enumerate}
+
+Nous n'avons pas retenu LXC ni Docker car ils posent des problèmes de sécurité
+Nous ne l'avons pas fait car ils ont tous les deux des problèmes de sécurités.
+En effet, nous avons réussi a eteindre la machine hote en faisant un shutdown dans un lxc et docker est connu pour etre vulnérable (https://blog.docker.com/2014/06/docker-container-breakout-proof-of-concept-exploit/).
+De plus (parler des priv escaladations).
 
 
 Ce choix d'utiliser des BSDjails nous imposant dès lors une distribution BSD, nous avons décider de nous diriger vers celles orientées serveurs les plus connues,
 c'est à dire FreeBSD, OpenBSD, NetBSD, DragonFlyBSD.
-Notre choix s'est porté immédiatement sur OpenBSD, une distribution dont tous les réglages par défaut sont orientés vers une sécurité maximale pour un serveur. Tous les autres systèmes peuvent être également utilisés de façon aussi sûre, mais ils ne sont pas conçus pour cela par défaut:
-    \begin{itemize}
+Notre choix s'est porté immédiatement sur OpenBSD, une distribution dont tous les réglages par défaut sont orientés vers une sécurité maximale pour un serveur.
+Tous les autres systèmes peuvent être également utilisés de façon aussi sûre, mais ils ne sont pas conçus pour cela par défaut:
+\begin{itemize}
     \item FreeBSD est un système d'exploitation multi-usage pour tout types d'utilisation, nous aurions dès lors pu l'utiliser aussi pour notre serveur, mais il nous aurait fallut plus de temps afin de la configurer pour avoir autant de sécurité que sur OpenBSD;
-    \item NetBSD a été conçu afin de tourner sur n'importe quel système, du pc de bureau à la console de jeu en passant par le grille-pain. À nouveau, il nous aurait été possible de l'utiliser mais nous aurions également dû passer du temps à le configurer.
-    \item DragonFlyBSD
-    \end{itemize}
-(comparaison de distro LaTeX: http://tex.stackexchange.com/questions/239199/LaTeX-distributions-what-are-their-main-differences)
+    \item NetBSD a été conçu afin de tourner sur n'importe quel système, du pc de bureau à la console de jeu en passant par le grille-pain. À nouveau, il nous aurait été possible de l'utiliser mais nous aurions également dû passer du temps à le configurer. Nous ne voulons pas non plus utiliser de grille-pain.
+    \item DragonFlyBSD est une modification de FreeBSD orientée vers une utilisation en cluster, ce qui n'est pas utile dans notre cas, n'ayant pas les moyens financiers d'en monter un.
+\end{itemize}
+
+Pour la distribution \LaTeX, l'utilisation d'une BSD nous laisse peu de choix: il n'existe pratiquement que la distribution Tex Live, que nous utiliserons donc, duh! %TODO
+
+Enfin, le logiciel antivirus choisi sera Clam AntiVirus.
+En effet, il est l'un des seuls à être à la fois gratuit et libre, ce qui suit la philosophie de notre start-up.
+Il est de plus très largement utilisé, ce qui renforce notre confiance en son développement et ses corrections rapides lors de rares failles de sécurité détectées.
+Sa forte utilisation nous permettra également des recherches aisées d'aides sur l'Internet en cas de soucis.
 
 \section{Mise en oeuvre}
-[serveur supplémentaire avec openbsd, une distribution LaTeX (texlive?) et un logiciel antivirus (clamav?)]
-Il faudra investir dans un nouveau serveur, sur lequel nous installerons (*bsd). Ceci fait, nous installerons une distribution \LaTeX et le logiciel antivirus.
+[serveur supplémentaire avec openbsd, une distribution \LaTeX (texlive?) et un logiciel antivirus (clamav?)]
+Il faudra investir dans un nouveau serveur, sur lequel nous installerons (*bsd).
+Ceci fait, nous installerons une distribution \LaTeX et le logiciel antivirus.
 Nous configurerons par la suite notre Celery et implémenterons nos scripts.
 
 \end{document}
