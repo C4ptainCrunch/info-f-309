@@ -17,34 +17,34 @@ HubDoc.be aimerait proposer aux étudiants utilisant leur plate-forme de pouvoir
 
 HubDoc.be est une jeune entreprise de 3 employés.
 Leur produit est développé en Python avec le framework Django.
-Actuellement elle dispose de deux serveurs (un serveur de production et un serveur de réserve en cas de panne) dont l'utilisation est relativement élevée.
+Actuellement elle dispose de deux serveurs GNU/Linux (un serveur de production et un serveur de réserve en cas de panne) dont l'utilisation est relativement élevée.
 HubDoc.be s'attend à une croissance assez importante dans les prochains mois;
 elle s'attend donc à devoir faire fonctionner son application sur plusieurs machines pour supporter la charge.
 
 
 \section{Introduction}
 
-Nos utilisateurs aimeraient pouvoir uploader des archives (.zip, .tar, ..) contenant des sources \LaTeX sur notre interface web et que notre service puisse les compiler en .pdf à la vollée.
+Nos utilisateurs aimeraient pouvoir uploader des archives (.zip, .tar, ..) contenant des sources \LaTeX via notre interface web et que notre service puisse les compiler en .pdf à la vollée.
 Cependant, la compilation de fichiers \LaTeX comporte des risques de sécurtié si l'auteur de ces fichiers n'est pas digne de confiance.
 En effet, il existe une commande \LaTeX qui permet d'exécuter des commandes shell.
 Cette vulnérabilité pourrait permettre à un utilisateur malicieux de prendre le contrôle de nos serveurs ou d'exposer publiquer les données des autres utilisateurs.
 
 \section{Descriptif}
 
-La compilation de fichiers \LaTeX n'étant donc pas sûre\footnote{Même en désacivant la commande permettant d'exécuter un shell, il existe d'autres moyens d'exécuter du code arbitraire depuis la compilation d'un fichier. https://0day.work/hacking-with-LaTeX/ en est un example.}, nous isolerons chaque compilation dans une BSDjail séparée.
+La compilation de fichiers \LaTeX n'étant pas sûre\footnote{Même en désacivant la commande permettant d'exécuter un shell, il existe d'autres moyens d'exécuter du code arbitraire depuis la compilation d'un fichier. https://0day.work/hacking-with-LaTeX/ en est un example.}, nous isolerons chaque compilation dans une BSDjail séparée.
 
-Le service de compilation \LaTeX sera hébergé sur des machines séparées des serveurs web et de conversion pdf vers image pour des raisons de sécurité, d'isolation et parce que les machines assurant ces services sont déjà suffisamment utilisées.
-Pour assurer la communication entre les serveurs web qui reçoivent les archives .zip contenant le \LaTeX et les serveurs de compilation nous utiliserons le système déjà utilisé ailleurs dans l'application :
+Le service de compilation \LaTeX sera hébergé sur des machines séparées du serveur web et de conversion pdf vers image pour des raisons de sécurité, d'isolation et parce que les machines assurant ces services sont déjà suffisamment utilisées.
+Pour assurer la communication entre les serveurs web qui reçoivent les archives .zip contenant le \LaTeX et les serveurs de compilation nous utiliserons un système déjà utilisé ailleurs dans l'application :
 Celery (http://www.celeryproject.org/); il s'agit d'une queue de jobs distribuée qui permet à des scripts qui tournent pendant très peu de temps (le temps d'une requête web) d'emmetre l'ordre d'effectuer une tache longue et complexe hors du cycle requête-réponse d'HTTP.
 
-Les workers Celery créeront une BSDjail par tache de compilation puis y copieront les sources \LaTeX avant de la démarrer et d'y exécuter le compilateur \LaTeX.
-Une fois que le compilateur aura fini de s'éxecuter la jail s'arrêtera et la tache Celery extraiera le fichier compilé de l'arborescence de la jail.
+Celery sera donc responsable de démarrer la compilation des sources \LaTeX dans un environnement sur et isolé.
 
 
 \section{Comparaison des alternatives}
-Pour isoler l'exécution du compilateur du reste du système ainsi que des autres compilations,
-nous avions le choix de plusieurs technologies : La vistualisation ou la conteneurisation.
-Pour la virtualisation, il existe beaucoup d'outils ayant tous les mêmes avantages et inconvénients dans notre cas :
+Pour isoler l'exécution du compilateur du reste du système ainsi que des autres compilations, nous avons le choix entre deux grandes techniques : la vistualisation ou la conteneurisation.
+
+\subsection{Virtualisation}
+Le marché de la virtualisation est fort développé et propose donc beaucoup d'alternatives
 \begin{enumerate}
     \item{KVM}
     \item{Qemu}
@@ -90,6 +90,10 @@ Il est de plus très largement utilisé, ce qui renforce notre confiance en son 
 Sa forte utilisation nous permettra également des recherches aisées d'aides sur l'Internet en cas de soucis.
 
 \section{Mise en oeuvre}
+
+Les workers Celery créeront une BSDjail par tache de compilation puis y copieront les sources \LaTeX avant de la démarrer et d'y exécuter le compilateur \LaTeX.
+Une fois que le compilateur aura fini de s'éxecuter la jail s'arrêtera et la tache Celery extraiera le fichier compilé de l'arborescence de la jail.
+
 [serveur supplémentaire avec openbsd, une distribution \LaTeX (texlive?) et un logiciel antivirus (clamav?)]
 Il faudra investir dans un nouveau serveur, sur lequel nous installerons (*bsd).
 Ceci fait, nous installerons une distribution \LaTeX et le logiciel antivirus.
