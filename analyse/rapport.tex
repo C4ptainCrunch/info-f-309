@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[francais]{babel}
 \usepackage[T1]{fontenc}
+\usepackage{hyperref}
 \author{Anthony \textsc{Caccia} \and Romain \textsc{Fontaine} \and Nikita \textsc{Marchant} }
 \date{}
 \title{\textsc{INFO-F-309 : Administration Système} Projet : Rapport d'analyse}
@@ -36,12 +37,12 @@ Cette vulnérabilité pourrait permettre à un utilisateur malicieux de prendre 
 
 \section{Descriptif}
 
-La compilation de fichiers \LaTeX n'étant pas sûre\footnote{Même en désactivant la commande permettant d'exécuter un shell, il existe d'autres moyens d'exécuter du code arbitraire depuis la compilation d'un fichier. https://0day.work/hacking-with-LaTeX/ en est un example.}, nous isolerons chaque compilation dans une BSDjail séparée.
+La compilation de fichiers \LaTeX n'étant pas sûre\footnote{Même en désactivant la commande permettant d'exécuter un shell, il existe d'autres moyens d'exécuter du code arbitraire depuis la compilation d'un fichier. \url{https://0day.work/hacking-with-LaTeX/} en est un example.}, nous isolerons chaque compilation dans une BSDjail séparée.
 
 Le service de compilation \LaTeX sera hébergé sur des machines séparées du serveur web et de conversion pdf vers image pour des raisons de sécurité, d'isolation et parce que les machines assurant ces services sont déjà suffisamment utilisées.
 
 Pour assurer la communication entre les serveurs web qui reçoivent les archives .zip contenant le \LaTeX et les serveurs de compilation nous utiliserons un système déjà utilisé ailleurs dans l'application :
-Celery\footnote{http://www.celeryproject.org/}.
+Celery\footnote{\url{http://www.celeryproject.org/}}.
 
 Il s'agit d'une file de tâches distribuée qui permet à des scripts qui tournent pendant très peu de temps (le temps d'une requête web) d'émettre l'ordre d'effectuer une tache longue et complexe hors du cycle requête-réponse d'HTTP.
 Celery sera donc responsable de démarrer la compilation des sources \LaTeX dans un environnement sur et isolé.
