@@ -44,27 +44,32 @@ Celery sera donc responsable de démarrer la compilation des sources \LaTeX dans
 Pour isoler l'exécution du compilateur du reste du système ainsi que des autres compilations, nous avons le choix entre deux grandes techniques : la vistualisation ou la conteneurisation.
 
 \subsection{Virtualisation}
-Le marché de la virtualisation est fort développé et propose donc beaucoup d'alternatives
-\begin{enumerate}
+Le marché de la virtualisation est fort développé et propose donc beaucoup d'alternatives. Nous en avons considéré plusieurs :
+\begin{itemize}
     \item{KVM}
     \item{Qemu}
     \item{Xen}
-    \item{Et bien d'autres}
-\end{enumerate}
+    \item{Hyper-V}
+\end{itemize}
 
-Nous n'utilisons pas la virtualisation (kvm) pusique les machines virtuelles sont fort lourdes.
-En effet, nous devrons lancer une nouvelle instance a chaque compilation puisque nous ne voulons point compiler un document \LaTeX dans une vm qui fut compromise par une compilation précedente.
-Pour utiliser kvm, nous avons aussi besoin des instruction de virtualisation qui ne sont pas disponibles sur nos serveurs.
+Nous n'en avons cependant retenu aucune. En effet, toutes ces solutions partagent un désavantage commun : une machine virtuelle est fort lourde.
 
+Nous pourrions potentiellement compiler des dizaines de documents en parrallèle et l'emprinte mémoire ainsi que le ``relativement long'' temps de démarrage d'une machine virtuelle risquerait de poser problème.
 
-Pour la conteneurisation, il existe aussi beaucoup d'alternatives. Les plus connues sont :
-\begin{enumerate}
+De plus, le niveau d'isolation que garantissent les machines virtuelle est trop important pour l'application que nous en ferions.
+
+\subsection{Conteneurs}
+Le domaine des conteneurs est plus récent que celui de la virtualisation et donc moins développé (quoiqu'en pleine expansion).
+
+Le conteneurs partagent eux aussi une caractéristique commune : ils ont été créés pour être légers et offir un niveau d'isolation moindre\footnote{La plus part partagent leur noyeau avec le système hote. (Ce qui ne nous pose pas problème ici)}
+
+\begin{itemize}
     \item{Docker}
     \item{LXC}
     \item{BSDJail}
     \item{Chroot linux}
     \item{OpenVZ}
-\end{enumerate}
+\end{itemize}
 
 Nous n'avons pas retenu LXC ni Docker car ils posent des problèmes de sécurité
 Nous ne l'avons pas fait car ils ont tous les deux des problèmes de sécurités.
