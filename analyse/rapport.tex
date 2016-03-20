@@ -30,25 +30,25 @@ elle s'attend donc à devoir faire fonctionner son application sur plusieurs mac
 \section{Introduction}
 
 Nos utilisateurs aimeraient pouvoir uploader des archives (.zip, .tar, ..) contenant des sources \LaTeX via notre interface web et que notre service puisse les compiler en .pdf à la vollée.
-Cependant, la compilation de fichiers \LaTeX comporte des risques de sécurtié si l'auteur de ces fichiers n'est pas digne de confiance.
+Cependant, la compilation de fichiers \LaTeX comporte des risques de sécurité si l'auteur de ces fichiers n'est pas digne de confiance.
 En effet, il existe une commande \LaTeX qui permet d'exécuter des commandes shell.
-Cette vulnérabilité pourrait permettre à un utilisateur malicieux de prendre le contrôle de nos serveurs ou d'exposer publiquer les données des autres utilisateurs.
+Cette vulnérabilité pourrait permettre à un utilisateur malicieux de prendre le contrôle de nos serveurs ou d'exposer les données des autres utilisateurs
 
 \section{Descriptif}
 
-La compilation de fichiers \LaTeX n'étant pas sûre\footnote{Même en désacivant la commande permettant d'exécuter un shell, il existe d'autres moyens d'exécuter du code arbitraire depuis la compilation d'un fichier. https://0day.work/hacking-with-LaTeX/ en est un example.}, nous isolerons chaque compilation dans une BSDjail séparée.
+La compilation de fichiers \LaTeX n'étant pas sûre\footnote{Même en désactivant la commande permettant d'exécuter un shell, il existe d'autres moyens d'exécuter du code arbitraire depuis la compilation d'un fichier. https://0day.work/hacking-with-LaTeX/ en est un example.}, nous isolerons chaque compilation dans une BSDjail séparée.
 
 Le service de compilation \LaTeX sera hébergé sur des machines séparées du serveur web et de conversion pdf vers image pour des raisons de sécurité, d'isolation et parce que les machines assurant ces services sont déjà suffisamment utilisées.
 
 Pour assurer la communication entre les serveurs web qui reçoivent les archives .zip contenant le \LaTeX et les serveurs de compilation nous utiliserons un système déjà utilisé ailleurs dans l'application :
 Celery\footnote{http://www.celeryproject.org/}.
 
-Il s'agit d'une file de tâches distribuée qui permet à des scripts qui tournent pendant très peu de temps (le temps d'une requête web) d'emmetre l'ordre d'effectuer une tache longue et complexe hors du cycle requête-réponse d'HTTP.
+Il s'agit d'une file de tâches distribuée qui permet à des scripts qui tournent pendant très peu de temps (le temps d'une requête web) d'émettre l'ordre d'effectuer une tache longue et complexe hors du cycle requête-réponse d'HTTP.
 Celery sera donc responsable de démarrer la compilation des sources \LaTeX dans un environnement sur et isolé.
 
 
 \section{Comparaison des alternatives}
-Pour isoler l'exécution du compilateur du reste du système ainsi que des autres compilations, nous avons le choix entre deux grandes techniques : la vistualisation ou la conteneurisation.
+Pour isoler l'exécution du compilateur du reste du système ainsi que des autres compilations, nous avons le choix entre deux grandes techniques : la virtualisation ou la conteneurisation.
 
 \subsection{Virtualisation}
 
@@ -63,14 +63,14 @@ Le marché de la virtualisation est fort développé et propose donc beaucoup d'
 
 Nous n'en avons cependant retenu aucune. En effet, toutes ces solutions partagent un désavantage commun : une machine virtuelle est fort lourde.
 
-Nous pourrions potentiellement compiler des dizaines de documents en parrallèle et l'emprinte mémoire ainsi que le ``relativement long'' temps de démarrage d'une machine virtuelle risquerait de poser problème.
+Nous pourrions potentiellement compiler des dizaines de documents en parallèle et l'empreinte mémoire ainsi que le ``relativement long'' temps de démarrage d'une machine virtuelle risquerait de poser problème.
 
 De plus, le niveau d'isolation que garantissent les machines virtuelle est trop important pour l'application que nous en ferions.
 
 \subsection{Conteneurs}
 Le domaine des conteneurs est plus récent que celui de la virtualisation et donc moins développé (quoiqu'en pleine expansion).
 
-Le conteneurs partagent eux aussi une caractéristique commune : ils ont été créés pour être légers et offir un niveau d'isolation moindre\footnote{Par exemple, la plus part partagent leur noyeau avec le système hote. (Ce qui ne nous pose pas problème ici)}.
+Le conteneurs partagent eux aussi une caractéristique commune : ils ont été créés pour être légers et offrir un niveau d'isolation moindre\footnote{Par exemple, la plus part partagent leur noyeau avec le système hote. (Ce qui ne nous pose pas problème ici)}.
 
 Voici les différentes alternatives que nous avons sélectionnées :
 
@@ -80,21 +80,22 @@ Voici les différentes alternatives que nous avons sélectionnées :
     \item{OpenVZ}
 \end{itemize}
 
-Nous n'avons pas retenu Docker car c'est une solution assez jeune et qu'il n'est pas certain qu'un Docker soit suffisement sur : la documentation officielle recommande de ne pas faire tourner de processus dans on a pas confiance en root.
+Nous n'avons pas retenu Docker car c'est une solution assez jeune et qu'il n'est pas certain qu'un Docker soit suffisamment sur : la documentation officielle recommande de ne pas faire tourner de processus dans on a pas confiance en root.
 
-LXC et OpenVZ sont quant à eux surs. Cependant, leur défaut par rapport aux BSDJails et au Chroot Linux est que le conteneur comporte un système complet, ce qui utilise plus de ressources que nécéssaire.
+LXC et OpenVZ sont quant à eux surs. Cependant, leur défaut par rapport aux BSDJails et au Chroot Linux est que le conteneur comporte un système complet, ce qui utilise plus de ressources que nécessaire.
 
 \subsection{Chroot et BSD Jails}
 
 Il nous reste donc à analyser les Chroot sous GNU/Linux et les Jail BSD. Les deux systèmes semblent être les plus légers qu'il existe sur le marché pour isoler des processus.
 
 
-Les Chroot Linux (comme Docker) ne sont cependant pas suffisement surs pour l'utilisations que nous voulons en faire\footnote{Il est possible pour un processus root dans un Chroot d'en sortir et d'atteindre l'hote.}
+Les Chroot Linux (comme Docker) ne sont cependant pas suffisamment sûrs pour l'utilisation que nous voulons en faire\footnote{Il est possible pour un processus root dans un Chroot d'en sortir et d'atteindre l'hôte.}
 
 Les Jails BSD sont donc notre seule option dont le niveau d'isolation est suffisant pour nos besoins et dont la consommation en ressources est suffisement faible.
 
+L'utilisation de ces Jails BSD force notre choix de distribution vers FreeBSD ou l'une de celles basées sur cette dernière. Nous retiendrons cependant notre choix sur l'originale, les autres étant principalement des surcouches apportant l'installation par défaut de différents logiciels. Aucune de ces distributions n'étant orientée vers la sécurité, nous nous tiendrons à FreeBSD.  
 
-Pour la distribution \LaTeX, l'utilisation d'une BSD nous laisse peu de choix: il n'existe pratiquement que la distribution Tex Live, que nous utiliserons donc, duh! %TODO
+Pour la distribution \LaTeX, l'utilisation d'une BSD nous laisse peu de choix: il n'existe que la distribution texlive, que nous utiliserons dès lors.
 
 Enfin, le logiciel antivirus choisi sera Clam AntiVirus.
 En effet, il est l'un des seuls à être à la fois gratuit et libre, ce qui suit la philosophie de notre start-up.
@@ -104,7 +105,7 @@ Sa forte utilisation nous permettra également des recherches aisées d'aides su
 \section{Mise en oeuvre}
 
 Les workers Celery créeront une BSDjail par tache de compilation puis y copieront les sources \LaTeX avant de la démarrer et d'y exécuter le compilateur \LaTeX.
-Une fois que le compilateur aura fini de s'éxecuter la jail s'arrêtera et la tache Celery extraiera le fichier compilé de l'arborescence de la jail.
+Une fois que le compilateur aura fini de s'exécuter la jail s'arrêtera et la tache Celery extraira le fichier compilé de l'arborescence de la jail.
 
 [serveur supplémentaire avec openbsd, une distribution \LaTeX (texlive?) et un logiciel antivirus (clamav?)]
 Il faudra investir dans un nouveau serveur, sur lequel nous installerons (*bsd).
