@@ -46,6 +46,8 @@ Celery\footnote{http://www.celeryproject.org/}.
 Il s'agit d'une file de tâches distribuée qui permet à des scripts qui tournent pendant très peu de temps (le temps d'une requête web) d'emmetre l'ordre d'effectuer une tache longue et complexe hors du cycle requête-réponse d'HTTP.
 Celery sera donc responsable de démarrer la compilation des sources \LaTeX dans un environnement sur et isolé.
 
+%TODO : antivirus
+
 
 \section{Comparaison des alternatives}
 Pour isoler l'exécution du compilateur du reste du système ainsi que des autres compilations, nous avons le choix entre deux grandes techniques : la vistualisation ou la conteneurisation.
@@ -82,17 +84,23 @@ Voici les différentes alternatives que nous avons sélectionnées :
 
 Nous n'avons pas retenu Docker car c'est une solution assez jeune et qu'il n'est pas certain qu'un Docker soit suffisement sur : la documentation officielle recommande de ne pas faire tourner de processus dans on a pas confiance en root.
 
-LXC et OpenVZ sont quant à eux surs. Cependant, leur défaut par rapport aux BSDJails et au Chroot Linux est que le conteneur comporte un système complet, ce qui utilise plus de ressources que nécéssaire.
+LXC et OpenVZ sont quant à eux surs.
+Cependant, leur défaut par rapport aux BSDJails et au Chroot Linux est que le conteneur comporte un système complet, ce qui utilise plus de ressources que nécéssaire.
+De plus, OpenVZ n'est plus maintenu\footnote{La dernière version date d'octobre 2011}.
 
 \subsection{Chroot et BSD Jails}
 
-Il nous reste donc à analyser les Chroot sous GNU/Linux et les Jail BSD. Les deux systèmes semblent être les plus légers qu'il existe sur le marché pour isoler des processus.
+Il nous reste donc à analyser les Chroot sous GNU/Linux et les Jail BSD.
+Les deux systèmes semblent être les plus légers qu'il existe sur le marché pour isoler des processus.
 
 
-Les Chroot Linux (comme Docker) ne sont cependant pas suffisement surs pour l'utilisations que nous voulons en faire\footnote{Il est possible pour un processus root dans un Chroot d'en sortir et d'atteindre l'hote.}
+Les Chroot Linux (comme Docker) ne sont cependant pas suffisement surs pour l'utilisations que nous voulons en faire\footnote{Il est possible pour un processus root dans un Chroot d'en sortir et d'atteindre l'hote.}.
 
 Les Jails BSD sont donc notre seule option dont le niveau d'isolation est suffisant pour nos besoins et dont la consommation en ressources est suffisement faible.
 
+En effet, les Jails ont été concues expressément dans le but d'isoler des processus et sont légères de par le fait qu'une jail ne contient pas un système complet.
+
+\subsection{Autres composants}
 
 Pour la distribution \LaTeX, l'utilisation d'une BSD nous laisse peu de choix: il n'existe pratiquement que la distribution Tex Live, que nous utiliserons donc, duh! %TODO
 
