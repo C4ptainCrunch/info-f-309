@@ -52,7 +52,7 @@ Celery sera donc responsable de démarrer la compilation des sources \LaTeX dans
 De plus, Celery sera aussi chargé d'effectuer une analyse anti-virus du .pdf produit pour éviter qu'un pdf produit par nos serveurs ne conienne un logiciel malveillant.
 
 \section{Comparaison des alternatives}
-Pour isoler l'exécution du compilateur du reste du système ainsi que des autres compilations, nous avons le choix entre deux grandes techniques : la virtualisation ou la conteneurisation.
+Pour isoler l'exécution du compilateur du reste du système ainsi que des autres compilations, nous avons le choix entre plusieurs techniques : la virtualisation, les conteneurs ou l'isolation de processus.
 
 \subsection{Virtualisation}
 
@@ -67,9 +67,9 @@ Le marché de la virtualisation est fort développé et propose donc beaucoup d'
 
 Nous n'en avons cependant retenu aucune. En effet, toutes ces solutions partagent un désavantage commun : une machine virtuelle est fort lourde.
 
-Nous pourrions potentiellement compiler des dizaines de documents en parallèle et l'empreinte mémoire ainsi que le ``relativement long'' temps de démarrage d'une machine virtuelle risquerait de poser problème.
+Nous pourrions potentiellement compiler des dizaines de documents en parallèle et l'empreinte mémoire ainsi que le relativement ``long'' temps de démarrage d'une machine virtuelle risqueraient de poser problème.
 
-De plus, le niveau d'isolation que garantissent les machines virtuelle est trop important pour l'application que nous en ferions.
+De plus, le niveau d'isolation que garantissent les machines virtuelle est trop important pour l'utilisation que nous en ferions.
 
 \subsection{Conteneurs}
 Le domaine des conteneurs est plus récent que celui de la virtualisation et donc moins développé (quoiqu'en pleine expansion).
