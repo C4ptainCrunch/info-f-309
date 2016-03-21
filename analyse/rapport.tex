@@ -125,21 +125,18 @@ Nous avons décidé de retenir ClamAV : il est développé depuis des années, e
 
 \section{Mise en œuvre}
 
-Nous utiliserons un seul serveur pour commencer mais il sera peut-être nécessaire d'en acheter un supplémentaire dans le cas où cette fonctionnalité a un succès important auprès des utilisateurs.
+Pour commencer, nous installerons un seul serveur de compilation mais il sera peut-être nécessaire d'en acheter un supplémentaire dans le cas où cette fonctionnalité a un succès important auprès des utilisateurs.
+
 La configuration idéale de cette machine serait avec un processeur puissant possédant un nombre important d'unités d'exécutions (un Intel Core i7 ou un Xeon par exemple) avec 8GB de RAM ou plus et un SSD de faible capacité (50GB sont suffisants).
 A titre indicatif, une machine de ce type peut être louée à partir de 40\euro { }par mois.
 
-\subsection{Planning}
 
-\begin{enumerate}
-    \item{plop}
-\end{enumerate}
 Une fois ce serveur acheté ou loué nous y installerons la distribution FreeBSD comme précisé dans la section \ref{jail}.
 
 Ensuite grâce au système de ports nous installerons Python 2, TexLive, ClamAV et leurs dépendances.
 
 
-Une fois ceci fais, nous allons créer des workers Celery dont le but sera d'attendre des tâches de demandes de compilation depuis le serveur de production.
+Une fois ceci fait, nous installerons des workers Celery dont le but sera d'attendre des tâches de demandes de compilation depuis le serveur de production.
 Lors de la réception d'une de ces requêtes, le worker créera automatiquement une nouvelle BSDjail avec les sources \LaTeX { }nécessaires à la compilation du document et la lancera.
 
 Lorsque la compilation sera terminée, le worker extraira le fichier compilé de l'arborescence de la Jail et le fera analyser par un antivirus (ici ClamAV) afin d'éviter d'envoyer des maliciels à nos clients.
