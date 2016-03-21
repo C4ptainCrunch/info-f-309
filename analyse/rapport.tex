@@ -122,13 +122,13 @@ Nous avons décidé de retenir ClamAV : il est développé depuis des années, e
 
 \section{Mise en œuvre}
 
-Nous utiliserons un seul serveur pour commencer mais il sera peut-être nécéssaire d'en acheter un suplémentaire dans le cas ou cette fonctionalité a un succès important auprès des utilisateurs.
+Nous utiliserons un seul serveur pour commencer mais il sera peut-être nécessaire d'en acheter un supplémentaire dans le cas où cette fonctionnalité a un succès important auprès des utilisateurs.
 La configuration idéale de cette machine serait avec un processeur puissant possédant un nombre important d'unités d'exécutions (un Intel Core i7 ou un Xeon par exemple) avec 8GB de RAM ou plus et un SSD de faible capacité (50GB sont suffisants).
 A titre indicatif, une machine de ce type peut être louée à partir de 40\euro { }par mois.
 
 Une fois ce serveur acheté ou loué nous y installerons la distribution FreeBSD.
 
-Ensuite grâce au système de ports nous installerons Python, TexLive, ClamAV et leurs dépendances.
+Ensuite grâce au système de ports nous installerons Python 2, TexLive, ClamAV et leurs dépendances.
 
 
 Une fois ceci fais, nous allons créer des workers Celery dont le but sera d'attendre des tâches de demandes de compilation depuis le serveur de production.
