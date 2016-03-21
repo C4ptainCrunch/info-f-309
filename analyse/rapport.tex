@@ -127,12 +127,12 @@ Pour partager les fichiers entres les différentes machines, nous avons le choix
 \begin{itemize}
     \item{NFS}
     \item{Samba}
-    \item{s3}
+    \item{Amazon S3}
 \end{itemize}
 
-Nous n'utiliserons pas Samba puisqu'il a été développé principalement pour Windows, ça coule de source. De plus, il n'est pas suffisamment sécurisé pour notre utilisation\footnote{\url{http://www.memoireonline.com/11/11/4927/m_Etude-et-mise-en-place-dun-serveur-contrleur-de-domaine-Samba-sur-administration-reseaux-sous-10.html}}.
+Nous n'utiliserons pas Samba puisqu'il a été développé principalement pour Windows, ça coule de source. De plus, il n'est pas suffisamment sécurisé pour notre utilisation\footnote{\url{http://goo.gl/avsDdH}}.
 
-Nous n'allons pas non plus utiliser s3 puisque celui-ci n'est pas gratuit et ne rentre pas dans le budget de notre startup. De plus stocker nos fichiers sur un serveur Amazon créerait de la latence pour nos utilisateurs lors du téléchargement de ceux-ci.
+Nous n'allons pas non plus utiliser Amazon S3 puisque celui-ci n'est pas gratuit et ne rentre pas dans le budget de notre startup. De plus stocker nos fichiers sur un serveur Amazon créerait de la latence pour nos utilisateurs lors du téléchargement de ceux-ci.
 
 Notre choix se portera donc sur NFS. En effet, celui-ci est libre, rapide car géré par le noyau et commode a mettre en place. De plus il est stable et, contrairement au deux autres, il a été conçu pour les systèmes UNIX.
 
