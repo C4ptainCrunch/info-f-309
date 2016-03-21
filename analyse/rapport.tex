@@ -43,15 +43,15 @@ Cette vulnérabilité pourrait permettre à un utilisateur malicieux de prendre 
 
 La compilation de fichiers \LaTeX { }n'étant pas sûre \footnote{Même en désactivant la commande permettant d'exécuter un shell, il existe d'autres moyens d'exécuter du code arbitraire depuis la compilation d'un fichier.  \url{https://0day.work/hacking-with-LaTeX/} en est un example.}, nous devrons isoler les compilations du reste du système.
 
-Le service de compilation \LaTeX { }sera hébergé sur des machines séparées du serveur web et de conversion pdf vers image pour des raisons de sécurité, d'isolation et parce que les machines assurant ces services sont déjà suffisamment utilisées.
+Le service de compilation \LaTeX { }sera hébergé sur des machines séparées du serveur web  pour des raisons de sécurité, d'isolation et parce que les machines assurant ces services sont déjà suffisamment utilisées, celles-ci réalisant aussi des conversions pdf vers image.
 
-Pour assurer la communication entre les serveurs web qui reçoivent les archives .zip contenant le \LaTeX { }et les serveurs de compilation nous utiliserons un système déjà utilisé ailleurs dans l'application :
+Pour assurer la communication entre les serveurs web qui reçoivent les archives .zip contenant le \LaTeX { }et les serveurs de compilation, nous utiliserons un système déjà utilisé ailleurs dans l'application :
 Celery\footnote{\url{http://www.celeryproject.org/}}.
 
-Il s'agit d'une file de tâches distribuée qui permet à des scripts qui tournent pendant peu de temps (le temps d'une requête web) d'émettre l'ordre d'effectuer une tache longue et complexe hors du cycle requête-réponse d'HTTP.
+Il s'agit d'une file de tâches distribuée qui permet à des scripts qui tournent pendant peu de temps (le temps d'une requête web) d'émettre l'ordre d'effectuer une tâche longue et complexe hors du cycle requête-réponse d'HTTP.
 Celery sera donc responsable de démarrer la compilation des sources \LaTeX { }dans un environnement sûr et isolé.
 
-Pour que les workers Celery aient accès aux sources \LaTeX { }uploadées par les utilisateurs sur le serveur web et qu'ils puissent ré-envoyer les pdf compilés au serveur web, un système de partage de fichiers devra être utilisé.
+Pour que les workers Celery aient accès aux sources \LaTeX { }uploadées par les utilisateurs sur le serveur web et qu'ils puissent renvoyer les pdf compilés au serveur web, nous mettrons en place un système de partage de fichiers.
 
 De plus, Celery sera aussi chargé d'effectuer une analyse antivirus du .pdf produit pour éviter qu'ils ne contiennent des logiciels malveillants.
 
@@ -63,9 +63,10 @@ Pour isoler l'exécution du compilateur du reste du système ainsi que des autre
 Le marché de la virtualisation est fort développé et propose donc beaucoup d'alternatives. Nous en avons considéré plusieurs :
 
 \begin{itemize}
+	\item{VirtualBox}
+	\item{VMWare}
     \item{KVM}
     \item{Qemu}
-    \item{Xen}
     \item{Hyper-V}
 \end{itemize}
 
@@ -84,26 +85,26 @@ Voici les différentes alternatives que nous avons sélectionnées :
 
 \begin{itemize}
     \item{Docker}
-    \item{Chroot linux}
+    \item{LXC}
     \item{OpenVZ}
 \end{itemize}
 
 Nous n'avons pas retenu Docker car c'est une solution assez jeune et qu'il n'est pas certain qu'un Docker soit suffisamment sûr : la documentation officielle recommande de ne pas faire tourner de processus dont on a pas confiance en root.
 
 LXC et OpenVZ sont quant à eux considérés comme sûrs.
-Cependant, leur défaut par rapport aux BSDJails et au Chroot Linux est que le conteneur comporte un système complet, ce qui utilise plus de ressources que nécessaire.
+Cependant, leur défaut par rapport aux BSDJails et au Chroot Linux (discutés par après) est que le conteneur comporte un système complet, ce qui utilise plus de ressources que nécessaire.
 De plus, OpenVZ n'est plus maintenu\footnote{La dernière version date d'octobre 2011}.
 
 \subsection{Isolation de processus}
 
-Il nous reste donc à analyser les techniques d'isolation de processus que sont Chroot sous GNU/Linux et les Jails sous FreeBSD.
+Il nous reste donc à analyser les techniques d'isolation de processus que sont Chroot sous GNU/Linux et les BSDJails sous FreeBSD.
 Les deux méthodes semblent être les plus légères existant sur le marché pour isoler des tâches en lesquelles nous n'avons pas confiance.
 
 Les Chroot Linux ne sont cependant pas suffisamment sûrs et cloisonnés pour l'utilisation que nous voulons en faire\footnote{Il est possible pour un processus root dans un Chroot d'en sortir et d'atteindre l'hôte.}.
 
 Les Jails BSD sont donc notre seule option dont le niveau d'isolation est suffisant pour nos besoins et dont la consommation en ressources est suffisamment faible.
 
-En effet, les Jails ont été conçues expressément dans le but d'isoler des processus et sont légères de par le fait qu'une Jail ne contient pas un système complet.
+En effet, les Jails ont été conçues expressément dans le but d'isoler des processus.Elles sont également légères de par le fait qu'une Jail ne contient pas un système complet.
 
 \subsection{Distribution utilisée}
 
@@ -127,12 +128,12 @@ Pour partager les fichiers entres les différentes machines, nous avons le choix
 \begin{itemize}
     \item{NFS}
     \item{Samba}
-    \item{Amazon S3}
+    \item{s3}
 \end{itemize}
 
-Nous n'utiliserons pas Samba puisqu'il a été développé principalement pour Windows, ça coule de source. De plus, il n'est pas suffisamment sécurisé pour notre utilisation\footnote{\url{http://goo.gl/avsDdH}}.
+Nous n'utiliserons pas Samba puisqu'il a été développé principalement pour communiquer avec des machines sous Windows, ce que nous ne ferons pas. De plus, il n'est pas suffisamment sécurisé pour notre utilisation\footnote{\url{http://www.memoireonline.com/11/11/4927/m_Etude-et-mise-en-place-dun-serveur-contrleur-de-domaine-Samba-sur-administration-reseaux-sous-10.html}}.
 
-Nous n'allons pas non plus utiliser Amazon S3 puisque celui-ci n'est pas gratuit et ne rentre pas dans le budget de notre startup. De plus stocker nos fichiers sur un serveur Amazon créerait de la latence pour nos utilisateurs lors du téléchargement de ceux-ci.
+Nous n'allons pas non plus utiliser s3 puisque celui-ci n'est pas gratuit et ne rentre pas dans le budget de notre startup. De plus stocker nos fichiers sur un serveur Amazon créerait de la latence pour nos utilisateurs lors du téléchargement de ceux-ci.
 
 Notre choix se portera donc sur NFS. En effet, celui-ci est libre, rapide car géré par le noyau et commode a mettre en place. De plus il est stable et, contrairement au deux autres, il a été conçu pour les systèmes UNIX.
 
