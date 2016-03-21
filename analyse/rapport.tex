@@ -3,6 +3,8 @@
 \usepackage[francais]{babel}
 \usepackage[T1]{fontenc}
 \usepackage{hyperref}
+\usepackage{eurosym}
+
 \author{Anthony \textsc{Caccia} \and Romain \textsc{Fontaine} \and Nikita \textsc{Marchant} }
 \date{}
 \title{\textsc{INFO-F-309 : Administration Système} Projet : Rapport d'analyse}
@@ -122,11 +124,12 @@ Nous avons décidé de retenir ClamAV : il est développé depuis des années, e
 
 Nous utiliserons un seul serveur pour commencer mais il sera peut-être nécéssaire d'en acheter un suplémentaire dans le cas ou cette fonctionalité a un succès important auprès des utilisateurs.
 La configuration idéale de cette machine serait avec un processeur puissant possédant un nombre important d'unités d'exécutions (un Intel Core i7 ou un Xeon par exemple) avec 8GB de RAM ou plus et un SSD de faible capacité (50GB sont suffisants).
-A titre indicatif, une machine de ce type peut être louée à partir de 40€ par mois.
+A titre indicatif, une machine de ce type peut être louée à partir de 40\euro { }par mois.
 
+Une fois ce serveur acheté ou loué nous y installerons la distribution FreeBSD.
 
+Ensuite grâce au système de ports nous installerons Python, TexLive, ClamAV et leurs dépendances.
 
-Pour mettre en place ce système, nous allons commencer par installer un nouveau serveur sous FreeBSD avec la stack \LaTeX et ClamAV installée.
 
 Une fois ceci fais, nous allons créer des workers Celery dont le but sera d'attendre des tâches de demandes de compilation depuis le serveur de production.
 Lors de la réception d'une de ces requêtes, le worker créera automatiquement une nouvelle BSDjail avec les sources \LaTeX nécessaires à la compilation du document et la lancera.
