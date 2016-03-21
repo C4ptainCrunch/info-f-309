@@ -133,7 +133,7 @@ Pour partager les fichiers entres les différentes machines, nous avons le choix
 
 Nous n'utiliserons pas Samba puisqu'il a été développé principalement pour communiquer avec des machines sous Windows, ce que nous ne ferons pas. De plus, il n'est pas suffisamment sécurisé pour notre utilisation\footnote{\url{http://goo.gl/avsDdH}}.
 
-Nous n'allons pas non plus utiliser Amazon Sii3 puisque celui-ci n'est pas gratuit et ne rentre pas dans le budget de notre startup. De plus stocker nos fichiers sur un serveur Amazon créerait de la latence pour nos utilisateurs lors du téléchargement de ceux-ci.
+Nous n'allons pas non plus utiliser Amazon S3 puisque celui-ci n'est pas gratuit et ne rentre pas dans le budget de notre startup. De plus stocker nos fichiers sur un serveur Amazon créerait de la latence pour nos utilisateurs lors du téléchargement de ceux-ci.
 
 Notre choix se portera donc sur NFS : celui-ci est libre, rapide car géré par le noyau et commode à mettre en place. De plus il est stable et, contrairement au deux autres, a été conçu pour les systèmes UNIX.
 
