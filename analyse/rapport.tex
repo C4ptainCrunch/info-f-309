@@ -21,7 +21,7 @@
 Une jeune startup, HubDoc.be, développe un site-web permettant à des étudiants d'uploader des fichiers pdf de syllabus et d'anciens examens.
 La valeur ajoutée de cette startup (en plus d'héberger ces fichiers) est de proposer un aperçu en ligne de ces fichiers pour les lire rapidement sans les télécharger.
 
-HubDoc aimerait proposer aux étudiants utilisant leur plateforme de pouvoir uploader leurs résumés écrits en \LaTeX et se chargerait de compiler ces différents documents à partir des sources.
+HubDoc aimerait proposer aux étudiants utilisant leur plateforme de pouvoir uploader leurs résumés écrits en \LaTeX { }et se chargerait de compiler ces différents documents à partir des sources.
 
 HubDoc est une jeune entreprise de 3 employés.
 Leur produit est développé en Python avec le framework Django.
@@ -33,23 +33,25 @@ elle prévoit donc de devoir faire fonctionner son application sur plusieurs mac
 
 \section{Introduction}
 
-Nos utilisateurs aimeraient pouvoir uploader des archives (.zip, .tar, ..) contenant des sources \LaTeX via notre interface web et que notre service puisse les compiler en .pdf à la volée.
+Nos utilisateurs aimeraient pouvoir uploader des archives (.zip, .tar, ..) contenant des sources \LaTeX { }via notre interface web et que notre service puisse les compiler en .pdf à la volée.
 
-Cependant, la compilation de fichiers \LaTeX comporte des risques de sécurité si l'auteur de ces fichiers n'est pas digne de confiance.
-En effet, il existe une commande \LaTeX qui permet d'exécuter des commandes shell.
+Cependant, la compilation de fichiers \LaTeX { }comporte des risques de sécurité si l'auteur de ces fichiers n'est pas digne de confiance.
+En effet, il existe une commande \LaTeX { }qui permet d'exécuter des commandes shell.
 Cette vulnérabilité pourrait permettre à un utilisateur malicieux de prendre le contrôle de nos serveurs ou d'exposer les données des autres utilisateurs.
 
 \section{Descriptif}
 
-La compilation de fichiers \LaTeX n'étant pas sûre \footnote{Même en désactivant la commande permettant d'exécuter un shell, il existe d'autres moyens d'exécuter du code arbitraire depuis la compilation d'un fichier.  \url{https://0day.work/hacking-with-LaTeX/} en est un example.}, nous devrons isoler les compilations du reste du système.
+La compilation de fichiers \LaTeX { }n'étant pas sûre \footnote{Même en désactivant la commande permettant d'exécuter un shell, il existe d'autres moyens d'exécuter du code arbitraire depuis la compilation d'un fichier.  \url{https://0day.work/hacking-with-LaTeX/} en est un example.}, nous devrons isoler les compilations du reste du système.
 
-Le service de compilation \LaTeX sera hébergé sur des machines séparées du serveur web et de conversion pdf vers image pour des raisons de sécurité, d'isolation et parce que les machines assurant ces services sont déjà suffisamment utilisées.
+Le service de compilation \LaTeX { }sera hébergé sur des machines séparées du serveur web et de conversion pdf vers image pour des raisons de sécurité, d'isolation et parce que les machines assurant ces services sont déjà suffisamment utilisées.
 
-Pour assurer la communication entre les serveurs web qui reçoivent les archives .zip contenant le \LaTeX et les serveurs de compilation nous utiliserons un système déjà utilisé ailleurs dans l'application :
+Pour assurer la communication entre les serveurs web qui reçoivent les archives .zip contenant le \LaTeX { }et les serveurs de compilation nous utiliserons un système déjà utilisé ailleurs dans l'application :
 Celery\footnote{\url{http://www.celeryproject.org/}}.
 
 Il s'agit d'une file de tâches distribuée qui permet à des scripts qui tournent pendant peu de temps (le temps d'une requête web) d'émettre l'ordre d'effectuer une tache longue et complexe hors du cycle requête-réponse d'HTTP.
-Celery sera donc responsable de démarrer la compilation des sources \LaTeX dans un environnement sûr et isolé.
+Celery sera donc responsable de démarrer la compilation des sources \LaTeX { }dans un environnement sûr et isolé.
+
+Pour que les workers Celery aient accès aux sources \LaTeX { }uploadées par les utilisateurs sur le serveur web et qu'ils puissent ré-envoyer les pdf compilés au serveur web, un système de partage de fichiers devra être utilisé.
 
 De plus, Celery sera aussi chargé d'effectuer une analyse antivirus du .pdf produit pour éviter qu'ils ne contiennent des logiciels malveillants.
 
@@ -138,7 +140,7 @@ Ensuite grâce au système de ports nous installerons Python, TexLive, ClamAV et
 
 
 Une fois ceci fais, nous allons créer des workers Celery dont le but sera d'attendre des tâches de demandes de compilation depuis le serveur de production.
-Lors de la réception d'une de ces requêtes, le worker créera automatiquement une nouvelle BSDjail avec les sources \LaTeX nécessaires à la compilation du document et la lancera.
+Lors de la réception d'une de ces requêtes, le worker créera automatiquement une nouvelle BSDjail avec les sources \LaTeX { }nécessaires à la compilation du document et la lancera.
 
 Lorsque la compilation sera terminée, le worker extraira le fichier compilé de l'arborescence de la Jail et le fera analyser par un antivirus (ici ClamAV) afin d'éviter d'envoyer des maliciels à nos clients.
 
