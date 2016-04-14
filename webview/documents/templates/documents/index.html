@@ -1,0 +1,29 @@
+{% extends "documents/base.html" %}
+{% load bootstrap3 %}
+
+{% block content %}
+<div class="panel panel-default">
+    <!-- Default panel contents -->
+    <div class="panel-heading">Documents:</div>
+
+    <!-- Table -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th class="col-xs-2">Status</th>
+            </tr>
+        </thead>
+        {% for document in documents_list %}
+        <tr>
+            <td>{{document.titre}}</td>
+            <td>{{document.get_status_display}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div class="text-center">
+  <button type="button" class="btn btn-primary btn-lg">Upload</button>
+</div>
+{% endblock %}
