@@ -8,7 +8,7 @@ class Document(models.Model):
                 ('W', 'Waiting'),
             )
     titre = models.CharField(max_length=255)
-    status = models.CharField(max_length=20, choices=STATES, default='PREPARING', db_index=True, verbose_name='État')
+    status = models.CharField(max_length=20, choices=STATES, default='W', db_index=True, verbose_name='État')
     zipFile = models.FileField(upload_to="uploads/", blank=True, null=True)
     pdf = models.FileField(upload_to="pdf/", blank=True, null=True)
 
