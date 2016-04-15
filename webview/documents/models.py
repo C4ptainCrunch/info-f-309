@@ -12,5 +12,8 @@ class Document(models.Model):
     zipFile = models.FileField(upload_to="uploads/", blank=True, null=True)
     pdf = models.FileField(upload_to="pdf/", blank=True, null=True)
 
+    def __repr__(self):
+        return "<Document: '%s'>" % self.titre
+
     def __str__(self):
         return self.titre
