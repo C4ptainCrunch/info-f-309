@@ -1,4 +1,5 @@
 from django.db import models
+import os
 
 # Create your models here.
 class Document(models.Model):
@@ -17,3 +18,6 @@ class Document(models.Model):
 
     def __str__(self):
         return self.titre
+
+    def filename(self):
+        return os.path.basename(self.zipFile.name)
