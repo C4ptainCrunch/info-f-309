@@ -17,7 +17,15 @@
         </thead>
         {% for document in documents_list %}
         <tr>
-            <td><a href={{document.zipFile.url}}>{{document.titre}}</a></td>
+            <td>
+                {% if document.pdf %}
+                <a href={{document.pdf.url}}>
+                {% endif %}
+                    {{document.titre}}
+                {% if document.pdf %}
+                </a>
+                {% endif %}
+            </td>
             <td><a href="{{document.zipFile.url}}">{{document.filename}}</a></td>
             <td>{{document.get_status_display}}</td>
         </tr>
