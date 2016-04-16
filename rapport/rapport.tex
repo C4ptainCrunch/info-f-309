@@ -1,0 +1,45 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{eurosym}
+
+\author{Anthony \textsc{Caccia} \and Romain \textsc{Fontaine} \and Nikita \textsc{Marchant} }
+\date{}
+\title{\textsc{INFO-F-309 : Administration Système} Projet : Rapport d'implémentation}
+
+\setlength{\parindent}{1.5em}
+\setlength{\parskip}{1em}
+% \renewcommand{\baselinestretch}{1.5}
+
+\begin{document}
+\maketitle
+
+\section{Serveur web}
+\subsection{Services}
+\begin{itemize}
+    \item nginx \texttt{systemctl start/stop/status nginx.service}
+    \item postgresql \texttt{systemctl start/stop/status nginx.service}
+    \item redis \texttt{systemctl start/stop/status redis-server.service}
+\end{itemize}
+
+\subsection{Procédure d'installation}
+
+
+\section{Serveur de compilation}
+\subsection{Services}
+\begin{itemize}
+    \item clamAV :
+        \begin{itemize}
+            \item clamd \texttt{/usr/local/etc/rc.d/clamav-clamd start/stop}
+            \item freshclam \texttt{/usr/local/etc/rc.d/clamav-freshclam ? start/stop}
+        \end{itemize}
+\end{itemize}
+
+\subsection{Procédure d'installation}
+
+
+
+\end{document}
+
