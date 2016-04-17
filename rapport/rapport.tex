@@ -299,8 +299,8 @@ Les sources du programme étant sur le site d'hébergement Github, l'user celery
   source ve/bin/activate
   pip install -r requirements.txt
   pip install psycopg2
-
 \end{lstlisting}
+
 Il faut ensuite ajouter le contenu de \texttt{local\_settings\_bsd.py} dans le fichier \texttt{webview/local\_settings.py}. %TODO: ref
 On peut maintenant démarrer Celery:
 \begin{enumerate}
@@ -357,6 +357,27 @@ Il faut ensuite s'assurer que plus aucune jail ne tourne. Si c'est le cas, on pe
   rm /home/j/mroot
   mv /home/j/mroot2 /home/j/mroot
 \end{lstlisting}
+
+\subsection{Utilisation des BSDJails par Celery}
+Afin de pouvoir envoyer des fichiers dans les jails et effectuer des actions sur ceux-ci, l'utilisateur celery doit à la fois avoir les droits de lecture et écriture dans le dossier des jails, mais également le droit d'intéragir avec celles-ci.
+
+Il est aisé de donner les droits de lecture et d'écriture: il suffit de modifier le propriétaire de /home/j et /home/js pour qu'il soit celery:
+\begin{lstlisting}[language=bash]
+  chown celery:celery /home/j/mroot /home/j/skel
+\end{lstlisting}
+
+Pour avoir le droit d'intéragir avec les jails, il aura fallut modifier le fichier sudoers
+en ajoutant ces lignes grâce à la commande \emph{visudo}:
+\begin{lstlisting}
+  celery ALL=(ALL) NOPASSWD: /sbin/mount
+  celery ALL=(ALL) NOPASSWD: /sbin/mount_nullfs
+  celery ALL=(ALL) NOPASSWD: /usr/sbin/jail
+  celery ALL=(ALL) NOPASSWD: /sbin/umount
+  celery ALL=(ALL) NOPASSWD: /bin/chflags
+  celery ALL=(ALL) NOPASSWD: /usr/sbin/jexec
+\end{lstlisting}
+Cela fait, les commandes mentionnées pourront être utilisées sans mot de passe par l'utilisateur celery
+
 
 \newpage
 \begin{appendices}
