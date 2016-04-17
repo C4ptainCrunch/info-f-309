@@ -8,6 +8,7 @@ from django.core.files import File
 import clamd
 import os
 import subprocess
+import re
 
 
 @shared_task
@@ -21,7 +22,8 @@ def compile_tex(document_id):
     try:
         subprocess.check_call(command, timeout=1800, stdout=fout, stderr=ferr)
         f = File(open("/tmp/%d.pdf" % document.id, "rb"), 'rb')
-        document.pdf.save(document.titre + ".pdf", f)
+        name = re.sub('[^A-Za-z0-9_]', '', Document.titre.replace(" ", "_")) + ".pdf"
+        document.pdf.save(name, f)
         os.remove("/tmp/%d.pdf" % document.id)
         document.status = "D"
         document.save()
