@@ -35,7 +35,7 @@ umount "$J/$1"
 chflags -R noschg "$JS/$1"
 chflags -R noschg "$J/$1"
 
-rm -rf "${JS/$1}"
-rm -rf "{$J/$1}"
+rm -rf "$JS/$1"
+rm -rf "$J/$1"
 
 set +e
