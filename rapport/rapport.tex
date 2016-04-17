@@ -71,16 +71,67 @@ Le partage des fichiers entre les deux serveurs est géré par la mise en place 
 L'application web est réalisée grâce au framework Django pour Python 3.
 %TODO
 
-\section{Installations}
-\label{sec:Installations}
+\section{Serveur web (Machine Debian)}
+\subsection{Services}
+Les services suivants tournent sur le premier serveur :
 
-\subsection{Machine Debian}
-\label{sub:Machine Debian}
-%TODO
+\texttt{Nginx} : il sert de proxy http pour l'application \texttt{Django} et sert via http les fichiers \texttt{zip} et \texttt{pdf}.
+Il écoute sur toutes les interfaces et sur le port \texttt{80}.
+Commande : \texttt{systemctl start/stop/status nginx.service}
 
-\subsection{Machine FreeBSD}
-\label{sub:Machine FreeBSD}
+\texttt{Postgresql} : le serveur de base de données.
+Il sert une unique base de données : \texttt{webview} qui est utilisée par l'application web.
+Il écoute en local sur un socket UNIX ansi que sur l'interface publique (retreinte par le firewall) sur le port \texttt{5432}.
+Commande : \texttt{systemctl start/stop/status nginx.service}
 
+\texttt{Redis} est utilisé comme message broker entre \texttt{Celery} et l'application web. Celui-ci écoute sur toutes les interfaces sur le port \texttt{6379} et demande un mot de passe.
+Commande : \texttt{systemctl start/stop/status redis-server.service}
+
+\texttt{Django} : C'est un processus \texttt{gunicorn} qui sert l'application web sur le port \texttt{8000} sur \texttt{localhost}.
+Commande : \texttt{systemctl start/stop/status django.service}
+
+Serveur \texttt{nfs} : le répertoire \texttt{/var/nfs} est partagé avec la machine BSD via \texttt{nfs}.
+Dans celui-ci se trouve \texttt{/var/nfs/webview/media} dans lequel est stocké tous les fichiers media de Django (principalement les fichiers \texttt{zip} et \texttt{pdf}).
+
+\texttt{NTP} : vu que nous travaillons sur plusieurs machines en parralèlle, il est indispensable d'avoir la même heure partout.
+C'est le travail de \texttt{NTP}.
+Commande : \texttt{systemctl start/stop/status ntp.service}
+
+\texttt{iptables} : % TODO rom1
+
+
+\subsection{Procédure d'installation}
+
+
+\section{Serveur de compilation (Machine BSD)}
+\subsection{Services}
+
+\texttt{Celery} : Celery est un ``worker'' : il écoute sur le ``message broker'' (le \texttt{redis} qui tourne sur l'autre machine) en attendant des ordres.
+Dès qu'il recoit une tache, il l'exécute et renvoie le résultat au ``message broker''.
+C'est \texttt{Celery} qui récupérera les fichiers sur le \texttt{nfs}, créera une \texttt{jail}, y compilera le \LaTeX, etc.
+Commande : \texttt{service celery start/stop}
+
+\texttt{ClamAV} : c'est l'outil qui nous permet de détecter des signatures de virus dans les pdf.
+Celui-ci est découpé en deux daemons :
+        \begin{itemize}
+            \item \texttt{clamd} : le processus qui vérifie les fichiers.
+
+            Il est accessible depuis \texttt{unix://var/run/clamav/clamd.sock}
+
+            (Commande : \texttt{/usr/local/etc/rc.d/clamav-clamd start/stop})
+            \item \texttt{freshclam} s'occupe de garder la base de signatures à jour.
+
+            (Commande : \texttt{/usr/local/etc/rc.d/clamav-freshclam start/stop})
+        \end{itemize}
+
+\vspace{1em} % wtf latex
+Client \texttt{nfs} : il se connecte à la machine \texttt{debian} et permet à \texttt{Celery} d'avoir accès aux fichiers téléversés sur l'autre machine ainsi qu'à renvoyer les fichiers compilés.
+Commande : \texttt{service nfsclient start/stop} ainsi que \texttt{mount /mnt} et \texttt{umount /mnt}
+
+\texttt{NTP} : même utilité que sur l'autre machine.
+Commande : \texttt{service start/stop ntpd}
+
+\subsection{Installation et mise à jour}
 Pour commencer, il a fallu installer quelques paquets avec la commande \emph{pkg}:
 \begin{lstlisting}[language=bash]
   pkg update
@@ -88,6 +139,8 @@ Pour commencer, il a fallu installer quelques paquets avec la commande \emph{pkg
   pkg install cpdup py34-sqlite3 py27-psycopg2 clamav
 \end{lstlisting}
 
+\subsection{Contrôle des BSDJails}
+\label{subs:Contrôle des BSDJails}
 Afin de pouvoir créer des BSDJails, il nous faut d'abord construire un espace utilisateur de référence.
 Il nous faut pour cela mettre à jour les sources FreeBSD situées dans le dossier \texttt{/usr/src}:
 \begin{lstlisting}[language=bash]
@@ -187,75 +240,6 @@ Puis on démonte tous les dossiers montés et on peut enfin les supprimer.
   rm -rf /home/js/example
 \end{lstlisting}
 
-\section{Serveur web (Machine Debian)}
-\subsection{Services}
-Les services suivants tournent sur le premier serveur :
-
-\texttt{Nginx} : il sert de proxy http pour l'application \texttt{Django} et sert via http les fichiers \texttt{zip} et \texttt{pdf}.
-Il écoute sur toutes les interfaces et sur le port \texttt{80}.
-Commande : \texttt{systemctl start/stop/status nginx.service}
-
-\texttt{Postgresql} : le serveur de base de données.
-Il sert une unique base de données : \texttt{webview} qui est utilisée par l'application web.
-Il écoute en local sur un socket UNIX ansi que sur l'interface publique (retreinte par le firewall) sur le port \texttt{5432}.
-Commande : \texttt{systemctl start/stop/status nginx.service}
-
-\texttt{Redis} est utilisé comme message broker entre \texttt{Celery} et l'application web. Celui-ci écoute sur toutes les interfaces sur le port \texttt{6379} et demande un mot de passe.
-Commande : \texttt{systemctl start/stop/status redis-server.service}
-
-\texttt{Django} : C'est un processus \texttt{gunicorn} qui sert l'application web sur le port \texttt{8000} sur \texttt{localhost}.
-Commande : \texttt{systemctl start/stop/status django.service}
-
-Serveur \texttt{nfs} : le répertoire \texttt{/var/nfs} est partagé avec la machine BSD via \texttt{nfs}.
-Dans celui-ci se trouve \texttt{/var/nfs/webview/media} dans lequel est stocké tous les fichiers media de Django (principalement les fichiers \texttt{zip} et \texttt{pdf}).
-
-\texttt{NTP} : vu que nous travaillons sur plusieurs machines en parralèlle, il est indispensable d'avoir la même heure partout.
-C'est le travail de \texttt{NTP}.
-Commande : \texttt{systemctl start/stop/status ntp.service}
-
-\texttt{iptables} : % TODO rom1
-
-
-\subsection{Procédure d'installation}
-
-
-\section{Serveur de compilation (Machine BSD)}
-\subsection{Services}
-
-\texttt{Celery} : Celery est un ``worker'' : il écoute sur le ``message broker'' (le \texttt{redis} qui tourne sur l'autre machine) en attendant des ordres.
-Dès qu'il recoit une tache, il l'exécute et renvoie le résultat au ``message broker''.
-C'est \texttt{Celery} qui récupérera les fichiers sur le \texttt{nfs}, créera une \texttt{jail}, y compilera le \LaTeX, etc.
-Commande : \texttt{service celery start/stop}
-
-\texttt{ClamAV} : c'est l'outil qui nous permet de détecter des signatures de virus dans les pdf.
-Celui-ci est découpé en deux daemons :
-        \begin{itemize}
-            \item \texttt{clamd} : le processus qui vérifie les fichiers.
-
-            Il est accessible depuis \texttt{unix://var/run/clamav/clamd.sock}
-
-            (Commande : \texttt{/usr/local/etc/rc.d/clamav-clamd start/stop})
-            \item \texttt{freshclam} s'occupe de garder la base de signatures à jour.
-
-            (Commande : \texttt{/usr/local/etc/rc.d/clamav-freshclam start/stop})
-        \end{itemize}
-
-\vspace{1em} % wtf latex
-Client \texttt{nfs} : il se connecte à la machine \texttt{debian} et permet à \texttt{Celery} d'avoir accès aux fichiers téléversés sur l'autre machine ainsi qu'à renvoyer les fichiers compilés.
-Commande : \texttt{service nfsclient start/stop} ainsi que \texttt{mount /mnt} et \texttt{umount /mnt}
-
-\texttt{NTP} : même utilité que sur l'autre machine.
-Commande : \texttt{service start/stop ntpd}
-
-\subsection{Procédure d'installation}
-
-\begin{lstlisting}[language=bash]
-En tant que root :
-    pkg update
-    pkg install bash zsh mosh git nginx python34 vim subversion screen
-    pkg install cpdup py34-sqlite3 py27-psycopg2 clamav
-    freebsd-update fetch
-    freebsd-update install
 
 Configuration du nfs :
     # ajouter `nfs_client_enable="YES"' dans /etc/rc.conf
