@@ -105,6 +105,15 @@ Commande : \texttt{systemctl start/stop/status ntp.service}
 
 \subsection{Procédure d'installation}
 
+\subsection{Mise à jour}
+
+Dans le cas ou l'on voudrait mettre à jour ce serveur,
+il faut exéccuter ces deux commandes en tant que root :
+\texttt{apt-get update}, \texttt{apt-get upgrade}.
+
+Pour mettre à jour l'application web, en tant que \texttt{www-data}
+il faut exécuter \texttt{git pull} depuis le dossier \texttt{/var/www/info-f-309}
+et ensuite en tant que \texttt{root} exécuter \texttt{systemctl restart django}.
 
 \section{Serveur de compilation (Machine BSD)}
 \subsection{Services}
@@ -134,7 +143,7 @@ Commande : \texttt{service nfsclient start/stop} ainsi que \texttt{mount /mnt} e
 \texttt{NTP} : même utilité que sur l'autre machine.
 Commande : \texttt{service start/stop ntpd}
 
-\subsection{Installation et mise à jour}
+\subsection{Installation}
 Pour commencer, il a fallu installer quelques paquets avec la commande \emph{pkg}:
 \begin{lstlisting}[language=bash]
   pkg update
@@ -313,7 +322,19 @@ En root :
     # ajouter `clamav_freshclam_enable="YES"' et `clamav_clamd_enable="YES"'
     # dans /etc/rc.conf
 
+
 \end{lstlisting}
+
+\subsection{Mise à jour}
+
+Dans le cas ou l'on voudrait mettre à jour ce serveur,
+il faut exéccuter ces deux commandes en tant que root :
+\texttt{freebsd-update fetch} puis \texttt{freebsd-update install}.
+
+Pour mettre à jour les tâches \texttt{Celery},
+en tant que \texttt{celery} il faut exécuter \texttt{git pull}
+epuis le dossier \texttt{/home/celery/info-f-309}
+et ensuite en tant que \texttt{root} exécuter \texttt{service restart celery}.
 
 \newpage
 \begin{appendices}
