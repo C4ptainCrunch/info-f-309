@@ -18,7 +18,7 @@ class Document(models.Model):
     status = models.CharField(max_length=20, choices=STATES, default='W', db_index=True, verbose_name='État')
     zipFile = models.FileField(upload_to="uploads/", validators=[validate_file_extension])
     pdf = models.FileField(upload_to="pdf/", blank=True, null=True)
-    clean = models.BooleanField(default=False)
+    isClean = models.BooleanField(default=False)
 
     def __repr__(self):
         return "<Document: '%s'>" % self.titre
