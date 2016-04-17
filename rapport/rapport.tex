@@ -81,7 +81,7 @@ Commande : \texttt{systemctl start/stop/status redis-server.service}
 \texttt{Django} : C'est un processus \texttt{gunicorn} qui sert l'application web sur le port \texttt{8000} sur \texttt{localhost}.
 Commande : \texttt{systemctl start/stop/status django.service}
 
-\texttt{nfs} : le répertoire \texttt{/var/nfs} est partagé avec la machine BSD via \texttt{nfs}.
+Serveur \texttt{nfs} : le répertoire \texttt{/var/nfs} est partagé avec la machine BSD via \texttt{nfs}.
 Dans celui-ci se trouve \texttt{/var/nfs/webview/media} dans lequel est stocké tous les fichiers media de Django (principalement les fichiers \texttt{zip} et \texttt{pdf}).
 
 \texttt{NTP} : vu que nous travaillons sur plusieurs machines en parralèlle, il est indispensable d'avoir la même heure partout.
@@ -96,13 +96,28 @@ Commande : \texttt{systemctl start/stop/status ntp.service}
 
 \section{Serveur de compilation (Machine BSD)}
 \subsection{Services}
-\begin{itemize}
-    \item clamAV :
+
+\texttt{Celery} : Celery est un ``worker'' : il écoute sur le ``message broker'' (le \texttt{redis} qui tourne sur l'autre machine) en attendant des ordres.
+Dès qu'il recoit une tache, il l'exécute et renvoie le résultat au ``message broker''.
+Commande : \texttt{service celery start/stop}
+
+\texttt{ClamAV} : c'est l'outil qui nous permet de détecter des signatures de virus dans les pdf.
+Celui-ci est découpé en deux daemons :
         \begin{itemize}
-            \item clamd \texttt{/usr/local/etc/rc.d/clamav-clamd start/stop}
-            \item freshclam \texttt{/usr/local/etc/rc.d/clamav-freshclam ? start/stop}
+            \item \texttt{clamd} : le processus qui vérifie les fichiers
+
+            (\texttt{/usr/local/etc/rc.d/clamav-clamd start/stop})
+            \item \texttt{freshclam} s'occupe de garder la base de signatures à jour.
+
+            (\texttt{/usr/local/etc/rc.d/clamav-freshclam start/stop})
         \end{itemize}
 \end{itemize}
+
+Client \texttt{nfs} : il se connecte à la machine \texttt{debian} et permet à \texttt{Celery} d'avoir accès aux fichiers téléversés sur l'autre machine ainsi qu'à renvoyer les fichiers compilés.
+Commande : \texttt{service nfsclient start/stop} ainsi que \texttt{mount /mnt} et \texttt{umount /mnt}
+
+\texttt{NTP} : même utilité que sur l'autre machine.
+Commande : \texttt{service start/stop ntpd}
 
 \subsection{Procédure d'installation}
 
