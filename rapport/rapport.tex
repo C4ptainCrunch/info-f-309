@@ -78,7 +78,17 @@ Commande : \texttt{systemctl start/stop/status nginx.service}
 \texttt{Redis} est utilisé comme message broker entre \texttt{Celery} et l'application web. Celui-ci écoute sur toutes les interfaces et demande un mot de passe.
 Commande : \texttt{systemctl start/stop/status redis-server.service}
 
-\texttt{Django} : l'application web. C'est un processus \texttt{gunicorn}.
+\texttt{Django} : C'est un processus \texttt{gunicorn} qui sert l'application web sur le port \texttt{8000} sur \texttt{localhost}.
+Commande : \texttt{systemctl start/stop/status django.service}
+
+\texttt{nfs} : le répertoire \texttt{/var/nfs} est partagé avec la machine BSD via \texttt{nfs}.
+Dans celui-ci se trouve \texttt{/var/nfs/webview/media} dans lequel est stocké tous les fichiers media de Django (principalement les fichiers \texttt{zip} et \texttt{pdf}).
+
+\texttt{NTP} : vu que nous travaillons sur plusieurs machines en parralèlle, il est indispensable d'avoir la même heure partout.
+C'est le travail de \texttt{NTP}.
+Commande : \texttt{systemctl start/stop/status ntp.service}
+
+\texttt{iptables} : % TODO rom1
 
 
 \subsection{Procédure d'installation}
