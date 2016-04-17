@@ -240,15 +240,15 @@ Puis on démonte tous les dossiers montés et on peut enfin les supprimer.
   rm -rf /home/js/example
 \end{lstlisting}
 
-
-Configuration du nfs :
-    # ajouter `nfs_client_enable="YES"' dans /etc/rc.conf
-    # démarer le service sans devoir rebooter
-    service nfsclient start
-    # ajouter la ligne suivante à /etc/fstab (l'ip est celle de la machine
-    # debian qui est le serveur nfs)
-    # 192.81.220.4:/var/nfs        /mnt        nfs        rw        0        0
-    mount -a # monte le nfs
+\subsection{Configuration du NFS}
+Le NFS permet de synchroniser l'horloge de la machine avec un serveur de temps.
+Voici sa méthode de configuration:
+\begin{enumerate}
+  \item ajouter ``nfs_client_enable="YES"'' dans \texttt{/etc/rc.conf}
+  \item démarrer le service avec \emph{service nfsclient start}
+  \item ajouter la ligne ``192.81.220.4:/var/nfs        /mnt        nfs        rw        0        0'' à \texttt{/etc/fstab}
+  \item remonter le sytème de fichier défini dans le fstab avec \emph{mount -a}
+\end{enumerate}
 
 Configuration de NTP :
     # ajouter `ntpd_enable="YES"' dans /etc/rc.conf
