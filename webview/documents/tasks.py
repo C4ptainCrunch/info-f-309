@@ -22,7 +22,7 @@ def compile_tex(document_id):
     try:
         subprocess.check_call(command, timeout=1800, stdout=fout, stderr=ferr)
         f = File(open("/tmp/%d.pdf" % document.id, "rb"), 'rb')
-        name = re.sub('[^A-Za-z0-9_]', '', Document.titre.replace(" ", "_")) + ".pdf"
+        name = re.sub('[^A-Za-z0-9_]', '', document.titre.replace(" ", "_")) + ".pdf"
         document.pdf.save(name, f)
         os.remove("/tmp/%d.pdf" % document.id)
         document.status = "D"
