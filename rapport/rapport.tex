@@ -4,6 +4,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{hyperref}
 \usepackage{eurosym}
+\usepackage{listingsutf8}
 
 \author{Anthony \textsc{Caccia} \and Romain \textsc{Fontaine} \and Nikita \textsc{Marchant} }
 \date{}
@@ -14,6 +15,7 @@
 % \renewcommand{\baselinestretch}{1.5}
 
 \begin{document}
+\lstset{inputencoding=utf8/latin1}
 \maketitle
 
 \section{Serveur web (Machine Debian)}
@@ -39,6 +41,7 @@
 
 \subsection{Procédure d'installation}
 
+\begin{lstlisting}[language=bash]
 En tant que root :
     pkg install bash zsh mosh git nginx python34 vim subversion screen cpdup py34-sqlite3 py27-psycopg2 clamav
     freebsd-update fetch
@@ -100,6 +103,7 @@ En root :
     sleep 300 # attendre quelques minutes qu'elle soit téléchargée
     service clamav-clamd onestart # démarer le daemon à la main et vérifier qu'il accepte de lire la base de signatures
     # ajouter `clamav_freshclam_enable="YES"' et `clamav_clamd_enable="YES"' dans /etc/rc.conf
+\end{lstlisting}
 
 
 \end{document}
