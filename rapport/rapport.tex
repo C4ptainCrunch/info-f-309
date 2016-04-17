@@ -47,24 +47,39 @@
 
 Le but de ce projet est de permettre à nos clients la compilation en ligne de documents rédigés au format \LaTeX sur un serveur distant.
 
-Pour cela, une interface web sera mise en place afin de téléverser une archive contenant les sources du document à compiler. Puis, à la réception de ce document, le serveur enverra les sources dans une BSDJail afin qu'elles soient traitées sans posssibilité de compromission de celui-ci.
+Pour cela, une interface web sera mise en place afin de téléverser une archive contenant les sources du document à compiler.
+Puis, à la réception de ce document, le serveur enverra les sources dans une BSDJail afin qu'elles soient traitées sans posssibilité de compromission de celui-ci.
 
 \section{Machines déployées}
 \label{sec:Machines déployées}
 
-Deux machines ont été déployées: une première machine sur laquelle tournera la distribution GNU/Linux Debian, et une deuxième qui aura pour système d'exploitation la distribution FreeBSD.
+Deux machines ont été déployées: une première machine sur laquelle tourne la distribution GNU/Linux Debian, et une deuxième qui a pour système d'exploitation la distribution FreeBSD.
 
-La première machine a pour tâche la mise en service de l'interface web, ainsi que le lancement des procédures de compilation sur la seconde machine.
+La première machine a pour tâche la mise en service de l'interface web,
+le stockage des fichiers \texttt{zip} et \texttt{pdf}
+ainsi que l'envoi des ordres de compilation sur la seconde machine.
 
-La seconde machine reçoit les sources à compiler, crée des BSDJails à la volée, y lance les compilations et l'analyse antivirus et renvoie le document final à la première machine.
+La seconde machine reçoit les ordres de compilation, crée des BSDJails à la volée, y place les sources récupérées sur la première machine,
+y lance les compilations et l'analyse antivirus et renvoie le document pdf final à la première machine.
 
 \section{Serveur web (Machine Debian)}
 \subsection{Services}
-\begin{itemize}
-    \item nginx \texttt{systemctl start/stop/status nginx.service}
-    \item postgresql \texttt{systemctl start/stop/status nginx.service}
-    \item redis \texttt{systemctl start/stop/status redis-server.service}
-\end{itemize}
+Les services suivants tournent sur le premier serveur :
+
+\texttt{Nginx} : il sert de proxy http pour l'application \texttt{Django} et sert via http les fichiers \texttt{zip} et \texttt{pdf}.
+Il écoute sur toutes les interfaces et sur le port \texttt{80}.
+Commande : \texttt{systemctl start/stop/status nginx.service}
+
+\texttt{Postgresql} : le serveur de base de données.
+Il sert une unique base de données : \texttt{webview} qui est utilisée par l'application web.
+Il écoute en local sur un socket UNIX ansi que sur l'interface publique (retreinte par le firewall).
+Commande : \texttt{systemctl start/stop/status nginx.service}
+
+\texttt{Redis} est utilisé comme message broker entre \texttt{Celery} et l'application web. Celui-ci écoute sur toutes les interfaces et demande un mot de passe.
+Commande : \texttt{systemctl start/stop/status redis-server.service}
+
+\texttt{Django} : l'application web. C'est un processus \texttt{gunicorn}.
+
 
 \subsection{Procédure d'installation}
 
