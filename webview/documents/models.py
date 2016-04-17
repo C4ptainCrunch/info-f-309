@@ -5,7 +5,6 @@ import os
 def validate_file_extension(value):
     if not value.name.endswith('.zip'):
         raise ValidationError(u"The file extension isn't zip.")
-    return True
 
 # Create your models here.
 class Document(models.Model):
