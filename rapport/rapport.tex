@@ -242,16 +242,19 @@ Puis on démonte tous les dossiers montés et on peut enfin les supprimer.
 
 \subsection{Configuration du NFS}
 \begin{enumerate}
-  \item ajouter ``nfs_client_enable="YES"'' dans \texttt{/etc/rc.conf}
+  \item ajouter ``nfs\_client\_enable="YES"'' dans \texttt{/etc/rc.conf}
   \item démarrer le service avec \emph{service nfsclient start}
   \item ajouter la ligne ``192.81.220.4:/var/nfs        /mnt        nfs        rw        0        0'' à \texttt{/etc/fstab}
   \item remonter le sytème de fichier défini dans le fstab avec \emph{mount -a}
 \end{enumerate}
 
-Configuration de NTP :
-    # ajouter `ntpd_enable="YES"' dans /etc/rc.conf
-    service ntpd start
+\subsection{Configuration du NTP}
+\begin{enumerate}
+  \item ajouter ``ntpd\_enable="YES"'' dans \texttt{/etc/rc.conf}
+  \item démarrer le service avec \emph{service ntpd start}
+\end{enumerate}
 
+\begin{lstlisting}[language=bash]
 Configuration de Celery :
 En root:
     adduser # commande interactive
