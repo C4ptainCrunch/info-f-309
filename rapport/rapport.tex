@@ -64,8 +64,106 @@ La seconde machine reçoit les sources à compiler, crée des BSDJails à la vol
 Le partage des fichiers entre les deux serveurs est géré par la mise en place d'un protocole NFS.
 
 L'application web est réalisée grâce au framework Django pour Python 3.
+%TODO
 
+\section{Installations}
+\label{sec:Installations}
 
+\subsection{Machine Debian}
+\label{sub:Machine Debian}
+%TODO
+
+\subsection{Machine FreeBSD}
+\label{sub:Machine FreeBSD}
+
+Pour commencer, il a fallu installer quelques paquets avec la commande \emph{pkg}:
+\begin{lstlisting}[language=bash]
+  pkg update
+  pkg install bash zsh mosh git nginx python34 vim subversion screen
+  pkg install cpdup py34-sqlite3 py27-psycopg2 clamav
+\end{lstlisting}
+
+Afin de pouvoir créer des BSDJails, il nous faut d'abord construire un espace utilisateur de référence. Il nous faut pour cela mettre à jour les sources FreeBSD situées dans le dossier \texttt{/usr/src}:
+\begin{lstlisting}[language=bash]
+  freebsd-update fetch
+  freebsd-update install
+\end{lstlisting}
+On peut ensuite supprimer l'éventuel ancien build, en n'oubliant pas de modifier les flags des fichiers pour que ceux-ci puissent être modifiés :
+\begin{lstlisting}[language=bash]
+  chflags -R noschg /usr/obj
+  rm -rf /usr/obj
+\end{lstlisting}
+Enfin, on peut lancer la compilation de ce build, ce qui peut prendre un certain temps (plus de deux heures en général):
+\begin{lstlisting}[language=bash]
+  cd /usr/src
+  make buidworld
+\end{lstlisting}
+
+À partir de ce build, il a été décidé de créer un modèle pour la création des jails. Ce modèle sera en deux parties:
+\begin{itemize}
+  \item la première partie située dans /home/j/mroot qui contiendra la partie commune à toutes ces jails, et qui sera toujours en lecture seule,
+  \item la seconde partie située dans /home/j/skel qui contiendra des dossiers propres à chaque jail et qui seront accessible en lecture-écriture.
+\end{itemize}
+Pour commencer, la première partie va être créée grâce à ces deux commandes:
+\begin{lstlisting}[language=bash]
+  cd /usr/src
+  mkdir /home/j/mroot
+  make installworld DESTDIR=/home/j/mroot # crée un "sous-système" dans le dossier DESTDIR
+  make distribution DESTDIR=/home/j/mroot # copie les fichiers de configuration dans la jail
+\end{lstlisting}
+Là, le dossier dans DESTDIR contiendra un sous-système dans lequel nous pouvons installer les logiciels nécessaires aux tâches de ces jails, c'est à dire la compilation \LaTeX:
+\begin{lstlisting}[language=bash]
+  chroot /home/j/mroot   # installation des logiciels nécessaires
+  pkg update && pkg install texlive-full
+  exit
+\end{lstlisting}
+Ensuite, nous allons déplacer les dossiers accessibles en lecture-écriture dans la seconde partie et ajouter des liens symboliques dans le dossier /home/j/mroot/s, où sera monté celle-ci:
+\begin{lstlisting}[language=bash]
+  mkdir /home/j/skel
+  mv /home/j/mroot/etc /home/j/skel
+  mv /home/j/mroot/root /home/j/skel
+  mv /home/j/mroot/tmp /home/j/skel
+  mv /home/j/mroot/home /home/j/skel
+  cd /home/j/mroot
+  mkdir s
+  ln -s s/etc etc
+  ln -s s/root root
+  ln -s s/home home
+  ln -s s/tmp tmp
+\end{lstlisting}
+Nous avons dès lors notre modèle pour la création de jails.
+
+Voici maintenant un exemple de création d'une jail, nommée example. On commence par créer les dossiers contenant la jail, le premier simplement avec \emph{mkdir}, le deuxième avec la commande \emph{cpdup}, qui crée une exacte réplique du fichier source. On peut ensuite les monter grâce aux commandes \emph{mount_nullfs} et \emph{mount}. Cette première commande permet d'accéder à des fichiers depuis différents emplacements.
+\begin{lstlisting}[language=bash]
+  mkdir /home/j/example
+  cpdup /home/j/skel /home/js/example
+  mount_nullfs -o ro /home/j/mroot /home/j/example
+  mount_nullfs -o rw /home/js/example /home/j/example/s
+  mount -t devfs /dev /home/j/example/dev
+\end{lstlisting}
+Là, on peut utiliser la commande \emph{jail} afin de lancer une jail:
+\begin{lstlisting}[language=bash]
+  jail -c path=/home/j/example name=example persist
+\end{lstlisting}
+"-c" indique que l'on crée une jail, "path" indique l'emplacement de la jail, "name" son nom et l'option "persist" garde la jail en route même si celle-ci n'accomplit aucune action.
+
+Afin d'accéder à cette jail depuis l'extérieur, il suffit d'accéder à l'emplacement où celle-ci se situe. Pour lancer une commande à l'intérieur de cette jail, on utilise la commande \emph{jexec} dont le premier argument est soit le nom de la jail, soit son jid (qui peut être déterminé grâce à la commande \emph{jls}), et les autres arguments correspondent à la commande à exécuter. Par exemple, pour ajouter un fichier "test.txt" dans la jail depuis l'extérieur et le lister depuis l'intérieur:
+\begin{lstlisting}[language=bash]
+  touch /home/js/example/home/test.txt
+  jexec example ls /home
+\end{lstlisting}
+
+Pour désactiver et supprimer cette jail, il faut tout d'abord la stopper grâce à la commande \emph{jail} à laquelle on passe le flag "-r". Puis on démonte tous les dossiers montés et on peut enfin les supprimer.
+\begin{lstlisting}[language=bash]
+  jail -r example
+  umount /home/j/example/s
+  umount /home/j/example/dev
+  umount /home/j/example
+  chflags -R noschg /home/j/example
+  chflags -R noschg /home/js/example
+  rm -rf /home/j/example
+  rm -rf /home/js/example
+\end{lstlisting}
 
 \section{Serveur web (Machine Debian)}
 \subsection{Services}
