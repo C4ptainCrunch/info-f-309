@@ -24,7 +24,7 @@ jail -c path="$J/$1" name="$1" persist
 
 # compiling latex + clamav + moving pdf output #TODO: path
 jexec "$1" sh -c 'cd /home && latexmk -pdf'
-mv "$JS/$1/home/*.pdf" "/tmp/$1.pdf"
+mv "$JS/$1/home/"*".pdf" "/tmp/$1.pdf"
 
 # stopping jail + folder deletion
 jail -r "$1"
