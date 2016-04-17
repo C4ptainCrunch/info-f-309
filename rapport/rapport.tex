@@ -114,8 +114,10 @@ Pour commencer, la première partie va être créée grâce à ces deux commande
 \begin{lstlisting}[language=bash]
   cd /usr/src
   mkdir /home/j/mroot
-  make installworld DESTDIR=/home/j/mroot # crée un "sous-système" dans le dossier DESTDIR
-  make distribution DESTDIR=/home/j/mroot # copie les fichiers de configuration dans la jail
+  # crée un "sous-système" dans le dossier DESTDIR
+  make installworld DESTDIR=/home/j/mroot
+  # copie les fichiers de configuration dans la jail
+  make distribution DESTDIR=/home/j/mroot
 \end{lstlisting}
 Là, le dossier dans DESTDIR contiendra un sous-système dans lequel nous pouvons installer les logiciels nécessaires aux tâches de ces jails, c'est à dire la compilation \LaTeX:
 \begin{lstlisting}[language=bash]
@@ -251,7 +253,8 @@ En tant que root :
 
 Configuration du nfs :
     # ajouter `nfs_client_enable="YES"' dans /etc/rc.conf
-    service nfsclient start # démarer le service sans devoir rebooter
+    # démarer le service sans devoir rebooter
+    service nfsclient start
     # ajouter la ligne suivante à /etc/fstab (l'ip est celle de la machine
     # debian qui est le serveur nfs)
     # 192.81.220.4:/var/nfs        /mnt        nfs        rw        0        0
@@ -305,11 +308,14 @@ dans \texttt{/var/run/celery/celery.pid}
 
 Configuration de ClamAV:
 En root :
-    service clamav-freshclam onestart # démarage à la main de freshclam pour télécharger
-                                      # la base de signatures
-    sleep 300 # attendre quelques minutes qu'elle soit téléchargée
-    service clamav-clamd onestart # démarer le daemon à la main et vérifier qu'il
-                                  # accepte de lire la base de signatures
+    # démarage à la main de freshclam pour télécharger
+    # la base de signatures
+    service clamav-freshclam onestart
+    # attendre quelques minutes qu'elle soit téléchargée
+    sleep 300
+    # démarer le daemon à la main et vérifier qu'il
+    # accepte de lire la base de signatures
+    service clamav-clamd onestart
     # ajouter `clamav_freshclam_enable="YES"' et `clamav_clamd_enable="YES"'
     # dans /etc/rc.conf
 
