@@ -1,4 +1,5 @@
 #!/bin/bash
+set +e
 
 #Usage: jailifier.sh netid zip_archive
 
@@ -38,3 +39,4 @@ chflags -R noschg "$J/$1"
 rm -rf "${JS/$1}"
 rm -rf "{$J/$1}"
 
+set -e

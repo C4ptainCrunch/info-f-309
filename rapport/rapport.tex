@@ -42,6 +42,22 @@
 \begin{document}
 \maketitle
 
+\section{Introduction}
+\label{sec:Introduction}
+
+Le but de ce projet est de permettre à nos clients la compilation en ligne de documents rédigés au format \LaTeX sur un serveur distant.
+
+Pour cela, une interface web sera mise en place afin de téléverser une archive contenant les sources du document à compiler. Puis, à la réception de ce document, le serveur enverra les sources dans une BSDJail afin qu'elles soient traitées sans posssibilité de compromission de celui-ci.
+
+\section{Machines déployées}
+\label{sec:Machines déployées}
+
+Deux machines ont été déployées: une première machine sur laquelle tournera la distribution GNU/Linux Debian, et une deuxième qui aura pour système d'exploitation la distribution FreeBSD.
+
+La première machine a pour tâche la mise en service de l'interface web, ainsi que le lancement des procédures de compilation sur la seconde machine.
+
+La seconde machine reçoit les sources à compiler, crée des BSDJails à la volée, y lance les compilations et l'analyse antivirus et renvoie le document final à la première machine.
+
 \section{Serveur web (Machine Debian)}
 \subsection{Services}
 \begin{itemize}
