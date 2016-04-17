@@ -254,50 +254,49 @@ Puis on démonte tous les dossiers montés et on peut enfin les supprimer.
   \item démarrer le service avec \emph{service ntpd start}
 \end{enumerate}
 
+\subsection{Configuration de Celery}
+On commence par créer un user "celery" avec la commande interactive \emph{adduser}:
+\begin{description}
+  \item[Username] celery
+  \item[Full name] celery
+  \item[Shell] bash
+  \item[Use password-based authentication?] no
+\end{description}
+Celery sera installé dans un environnement virtuel python, nous devons donc nous assurer de disposer des paquets pip et virtualenv:
 \begin{lstlisting}[language=bash]
-Configuration de Celery :
-En root:
-    adduser # commande interactive
-    # répondre comme ceci :
-    # Username: celery
-    # Full name: celery
-    # Shell (sh csh tcsh zsh rzsh git-shell bash rbash nologin) [sh]:  bash
-    # Use password-based authentication? [yes]: no
-
-    sudo python3.4 -m ensurepip # installe pip pour python3.4
-    sudo python3.4 -m pip install virtualenv # install virtualenv
-
-    # création des dossiers pour les pid et les logs de celery
-    sudo mkdir /var/log/celery
-    sudo chown celery:celery /var/log/celery/
-    sudo mkdir /var/run/celery
-    sudo chown celery:celery /var/run/celery/
-
-En tant que celery :
-    cd # retourner dans la home de celery
-
-    git clone https://github.com/C4ptainCrunch/info-f-309.git
-    cd info-f-309/webview
-
-    virtualenv ve
-    source ve/bin/activate
-    pip install -r requirements.txt
-    pip install psycopg2
-
-    nano webview/local_settings.py # y placer le contenu de
-                                   # local_settings_bsd.py ci-joint
-
-A nouveau en root :
-    nano /etc/rc.d/celery #y placer le contenu de celery-rc.d ci-joint
-    # ajouter `celery_enable="YES"' dans /etc/rc.conf
-    # ajouter `celery_cmd="/home/celery/info-f-309/webview/ve/bin/celery"'
-    # dans /etc/rc.conf
-    service celery start
-
-Vous pouvez vérifier que celery tourne bien en allant regarder son pid
-dans \texttt{/var/run/celery/celery.pid}
-
+  sudo python3.4 -m ensurepip # installe pip pour python3.4
+  sudo python3.4 -m pip install virtualenv # install virtualenv
 \end{lstlisting}
+Il faut ensuite créer des dossiers pour sauvegarder les pid et les logs de Celery:
+\begin{lstlisting}[language=bash]
+  sudo mkdir /var/log/celery
+  sudo chown celery:celery /var/log/celery/
+  sudo mkdir /var/run/celery
+  sudo chown celery:celery /var/run/celery/
+\end{lstlisting}
+Les sources du programme étant sur le site d'hébergement Github, l'user celery va cloner le dépôt dans sa home, initialiser un virtualenv et installer les dépendances.
+\begin{lstlisting}[language=bash]
+  su celery
+  cd # retourner dans la home de celery
+
+  git clone https://github.com/C4ptainCrunch/info-f-309.git
+  cd info-f-309/webview
+
+  virtualenv ve
+  source ve/bin/activate
+  pip install -r requirements.txt
+  pip install psycopg2
+\end{lstlisting}
+Il faut ensuite ajouter le contenu de \texttt{local\_settings\_bsd.py} dans le fichier \texttt{webview/local\_settings.py}. %TODO: ref
+On peut maintenant démarrer Celery:
+\begin{enumerate}
+  \item à \texttt{/etc/rc.d/celery} on ajoute le contenu de \texttt{celery-rc.d} %TODO: ref
+  \item à \texttt{/etc/rc.d/celery}, on ajoute les lignes ``celery\_enable="YES"'' et ``celery\_cmd="/home/celery/info-f-309/webview/ve/bin/celery"''
+  \item on peut ensuite démarrer le service avec \emph{service celery start}
+\end{enumerate}
+
+On peut vérifier que celery tourne bien en allant regarder son pid dans \texttt{/var/run/celery/celery.pid}
+
 \subsection{Configuration de ClamAV}
 \begin{enumerate}
   \item démarrage de freshclam, pour télécharger la base de signatures, avec \emph{service clamav-freshclam onestart}
