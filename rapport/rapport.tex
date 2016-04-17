@@ -88,7 +88,8 @@ Pour commencer, il a fallu installer quelques paquets avec la commande \emph{pkg
   pkg install cpdup py34-sqlite3 py27-psycopg2 clamav
 \end{lstlisting}
 
-Afin de pouvoir créer des BSDJails, il nous faut d'abord construire un espace utilisateur de référence. Il nous faut pour cela mettre à jour les sources FreeBSD situées dans le dossier \texttt{/usr/src}:
+Afin de pouvoir créer des BSDJails, il nous faut d'abord construire un espace utilisateur de référence.
+Il nous faut pour cela mettre à jour les sources FreeBSD situées dans le dossier \texttt{/usr/src}:
 \begin{lstlisting}[language=bash]
   freebsd-update fetch
   freebsd-update install
@@ -105,7 +106,8 @@ Enfin, on peut lancer la compilation de ce build, ce qui peut prendre un certain
   make buidworld
 \end{lstlisting}
 
-À partir de ce build, il a été décidé de créer un modèle pour la création des jails. Ce modèle sera en deux parties:
+À partir de ce build, il a été décidé de créer un modèle pour la création des jails.
+Ce modèle sera en deux parties:
 \begin{itemize}
   \item la première partie située dans /home/j/mroot qui contiendra la partie commune à toutes ces jails, et qui sera toujours en lecture seule,
   \item la seconde partie située dans /home/j/skel qui contiendra des dossiers propres à chaque jail et qui seront accessible en lecture-écriture.
@@ -114,8 +116,10 @@ Pour commencer, la première partie va être créée grâce à ces deux commande
 \begin{lstlisting}[language=bash]
   cd /usr/src
   mkdir /home/j/mroot
-  make installworld DESTDIR=/home/j/mroot # crée un "sous-système" dans le dossier DESTDIR
-  make distribution DESTDIR=/home/j/mroot # copie les fichiers de configuration dans la jail
+  # crée un "sous-système" dans le dossier DESTDIR
+  make installworld DESTDIR=/home/j/mroot
+  # copie les fichiers de configuration dans la jail
+  make distribution DESTDIR=/home/j/mroot
 \end{lstlisting}
 Là, le dossier dans DESTDIR contiendra un sous-système dans lequel nous pouvons installer les logiciels nécessaires aux tâches de ces jails, c'est à dire la compilation \LaTeX:
 \begin{lstlisting}[language=bash]
@@ -139,7 +143,12 @@ Ensuite, nous allons déplacer les dossiers accessibles en lecture-écriture dan
 \end{lstlisting}
 Nous avons dès lors notre modèle pour la création de jails.
 
-Voici maintenant un exemple de création d'une jail, nommée example. On commence par créer les dossiers contenant la jail, le premier simplement avec \emph{mkdir}, le deuxième avec la commande \emph{cpdup}, qui crée une exacte réplique du fichier source. On peut ensuite les monter grâce aux commandes \emph{mount\_nullfs} et \emph{mount}. Cette première commande permet d'accéder à des fichiers depuis différents emplacements.
+Voici maintenant un exemple de création d'une jail, nommée example.
+On commence par créer les dossiers contenant la jail, le premier simplement avec \emph{mkdir},
+le deuxième avec la commande \emph{cpdup}, qui crée une exacte réplique du fichier source.
+On peut ensuite les monter grâce aux commandes \emph{mount\_nullfs} et \emph{mount}.
+Cette première commande permet d'accéder à des fichiers depuis différents emplacements.
+
 \begin{lstlisting}[language=bash]
   mkdir /home/j/example
   cpdup /home/j/skel /home/js/example
@@ -151,15 +160,22 @@ Là, on peut utiliser la commande \emph{jail} afin de lancer une jail:
 \begin{lstlisting}[language=bash]
   jail -c path=/home/j/example name=example persist
 \end{lstlisting}
-"-c" indique que l'on crée une jail, "path" indique l'emplacement de la jail, "name" son nom et l'option "persist" garde la jail en route même si celle-ci n'accomplit aucune action.
+"-c" indique que l'on crée une jail, "path" indique l'emplacement de la jail,
+"name" son nom et l'option "persist" garde la jail en route même si celle-ci n'accomplit aucune action.
 
-Afin d'accéder à cette jail depuis l'extérieur, il suffit d'accéder à l'emplacement où celle-ci se situe. Pour lancer une commande à l'intérieur de cette jail, on utilise la commande \emph{jexec} dont le premier argument est soit le nom de la jail, soit son jid (qui peut être déterminé grâce à la commande \emph{jls}), et les autres arguments correspondent à la commande à exécuter. Par exemple, pour ajouter un fichier "test.txt" dans la jail depuis l'extérieur et le lister depuis l'intérieur:
+Afin d'accéder à cette jail depuis l'extérieur, il suffit d'accéder à l'emplacement où celle-ci se situe.
+Pour lancer une commande à l'intérieur de cette jail,
+on utilise la commande \emph{jexec} dont le premier argument est soit le nom de la jail,
+soit son jid (qui peut être déterminé grâce à la commande \emph{jls}),
+et les autres arguments correspondent à la commande à exécuter.
+Par exemple, pour ajouter un fichier "test.txt" dans la jail depuis l'extérieur et le lister depuis l'intérieur:
 \begin{lstlisting}[language=bash]
   touch /home/js/example/home/test.txt
   jexec example ls /home
 \end{lstlisting}
 
-Pour désactiver et supprimer cette jail, il faut tout d'abord la stopper grâce à la commande \emph{jail} à laquelle on passe le flag "-r". Puis on démonte tous les dossiers montés et on peut enfin les supprimer.
+Pour désactiver et supprimer cette jail, il faut tout d'abord la stopper grâce à la commande \emph{jail} à laquelle on passe le flag "-r".
+Puis on démonte tous les dossiers montés et on peut enfin les supprimer.
 \begin{lstlisting}[language=bash]
   jail -r example
   umount /home/j/example/s
@@ -239,7 +255,8 @@ En tant que root :
 
 Configuration du nfs :
     # ajouter `nfs_client_enable="YES"' dans /etc/rc.conf
-    service nfsclient start # démarer le service sans devoir rebooter
+    # démarer le service sans devoir rebooter
+    service nfsclient start
     # ajouter la ligne suivante à /etc/fstab (l'ip est celle de la machine
     # debian qui est le serveur nfs)
     # 192.81.220.4:/var/nfs        /mnt        nfs        rw        0        0
@@ -293,11 +310,14 @@ dans \texttt{/var/run/celery/celery.pid}
 
 Configuration de ClamAV:
 En root :
-    service clamav-freshclam onestart # démarage à la main de freshclam pour télécharger
-                                      # la base de signatures
-    sleep 300 # attendre quelques minutes qu'elle soit téléchargée
-    service clamav-clamd onestart # démarer le daemon à la main et vérifier qu'il
-                                  # accepte de lire la base de signatures
+    # démarage à la main de freshclam pour télécharger
+    # la base de signatures
+    service clamav-freshclam onestart
+    # attendre quelques minutes qu'elle soit téléchargée
+    sleep 300
+    # démarer le daemon à la main et vérifier qu'il
+    # accepte de lire la base de signatures
+    service clamav-clamd onestart
     # ajouter `clamav_freshclam_enable="YES"' et `clamav_clamd_enable="YES"'
     # dans /etc/rc.conf
 
