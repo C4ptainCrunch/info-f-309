@@ -16,7 +16,7 @@
 \begin{document}
 \maketitle
 
-\section{Serveur web}
+\section{Serveur web (Machine Debian)}
 \subsection{Services}
 \begin{itemize}
     \item nginx \texttt{systemctl start/stop/status nginx.service}
@@ -27,7 +27,7 @@
 \subsection{Procédure d'installation}
 
 
-\section{Serveur de compilation}
+\section{Serveur de compilation (Machine BSD)}
 \subsection{Services}
 \begin{itemize}
     \item clamAV :
@@ -39,6 +39,67 @@
 
 \subsection{Procédure d'installation}
 
+En tant que root :
+    pkg install bash zsh mosh git nginx python34 vim subversion screen cpdup py34-sqlite3 py27-psycopg2 clamav
+    freebsd-update fetch
+    freebsd-update install
+
+Configuration du nfs :
+    # ajouter `nfs_client_enable="YES"' dans /etc/rc.conf
+    service nfsclient start # démarer le service sans devoir rebooter
+    # ajouter la ligne suivante à /etc/fstab (l'ip est celle de la machine debian qui est le serveur nfs)
+    # 192.81.220.4:/var/nfs        /mnt        nfs        rw        0        0
+    mount -a # monte le nfs
+
+Configuration de NTP :
+    # ajouter `ntpd_enable="YES"' dans /etc/rc.conf
+    service ntpd start
+
+Configuration de Celery :
+En root:
+    adduser # commande interactive
+    # répondre comme ceci :
+    # Username: celery
+    # Full name: celery
+    # Shell (sh csh tcsh zsh rzsh git-shell bash rbash nologin) [sh]:  bash
+    # Use password-based authentication? [yes]: no
+
+    sudo python3.4 -m ensurepip # installe pip pour python3.4
+    sudo python3.4 -m pip install virtualenv # install virtualenv
+
+    # création des dossiers pour les pid et les logs de celery
+    sudo mkdir /var/log/celery
+    sudo chown celery:celery /var/log/celery/
+    sudo mkdir /var/run/celery
+    sudo chown celery:celery /var/run/celery/
+
+En tant que celery :
+    cd # retourner dans la home de celery
+
+    git clone https://github.com/C4ptainCrunch/info-f-309.git
+    cd info-f-309/webview
+
+    virtualenv ve
+    source ve/bin/activate
+    pip install -r requirements.txt
+    pip install psycopg2
+
+    nano webview/local_settings.py # y placer le contenu de local_settings_bsd.py ci-joint
+
+A nouveau en root :
+    nano /etc/rc.d/celery #y placer le contenu de celery-rc.d ci-joint
+    # ajouter `celery_enable="YES"' dans /etc/rc.conf
+    # ajouter `celery_cmd="/home/celery/info-f-309/webview/ve/bin/celery"' dans /etc/rc.conf
+    service celery start
+
+Vous pouvez vérifier que celery tourne bien en allant regarder son pid dans \texttt{/var/run/celery/celery.pid}
+
+Configuration de ClamAV:
+En root :
+    service clamav-freshclam onestart # démarage à la main de freshclam pour télécharger la base de signatures
+    sleep 300 # attendre quelques minutes qu'elle soit téléchargée
+    service clamav-clamd onestart # démarer le daemon à la main et vérifier qu'il accepte de lire la base de signatures
+    # ajouter `clamav_freshclam_enable="YES"' et `clamav_clamd_enable="YES"' dans /etc/rc.conf
 
 
 \end{document}
