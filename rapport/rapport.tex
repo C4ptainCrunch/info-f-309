@@ -4,7 +4,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{hyperref}
 \usepackage{eurosym}
-\usepackage{listingsutf8}
+\usepackage{listings}
 
 \author{Anthony \textsc{Caccia} \and Romain \textsc{Fontaine} \and Nikita \textsc{Marchant} }
 \date{}
@@ -14,8 +14,29 @@
 \setlength{\parskip}{1em}
 % \renewcommand{\baselinestretch}{1.5}
 
+\lstset{%
+    inputencoding=utf8,
+    extendedchars=true,
+    literate=%
+            {é}{{\'{e}}}1
+            {è}{{\`{e}}}1
+            {ê}{{\^{e}}}1
+            {ë}{{\¨{e}}}1
+            {û}{{\^{u}}}1
+            {ù}{{\`{u}}}1
+            {â}{{\^{a}}}1
+            {à}{{\`{a}}}1
+            {î}{{\^{i}}}1
+            {ô}{{\^{o}}}1
+            {ç}{{\c{c}}}1
+            {Ç}{{\c{C}}}1
+            {É}{{\'{E}}}1
+            {Ê}{{\^{E}}}1
+            {À}{{\`{A}}}1
+            {Â}{{\^{A}}}1
+            {Î}{{\^{I}}}1
+}
 \begin{document}
-\lstset{inputencoding=utf8/latin1}
 \maketitle
 
 \section{Serveur web (Machine Debian)}
