@@ -12,7 +12,7 @@ mkdir "$JS/$1"
 cpdup "$J/skel" "$JS/$1"
 
 # unzip and send sources to jail
-sudo unzip "$2" -d "$JS/$1/home"
+unzip "$2" -d "$JS/$1/home"
 
 # mounting jail
 sudo mount_nullfs -o ro "$J/mroot" "$J/$1"
