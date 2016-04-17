@@ -195,10 +195,10 @@ Commande : \texttt{systemctl start/stop/status nginx.service}
 
 \texttt{Postgresql} : le serveur de base de données.
 Il sert une unique base de données : \texttt{webview} qui est utilisée par l'application web.
-Il écoute en local sur un socket UNIX ansi que sur l'interface publique (retreinte par le firewall).
+Il écoute en local sur un socket UNIX ansi que sur l'interface publique (retreinte par le firewall) sur le port \texttt{5432}.
 Commande : \texttt{systemctl start/stop/status nginx.service}
 
-\texttt{Redis} est utilisé comme message broker entre \texttt{Celery} et l'application web. Celui-ci écoute sur toutes les interfaces et demande un mot de passe.
+\texttt{Redis} est utilisé comme message broker entre \texttt{Celery} et l'application web. Celui-ci écoute sur toutes les interfaces sur le port \texttt{6379} et demande un mot de passe.
 Commande : \texttt{systemctl start/stop/status redis-server.service}
 
 \texttt{Django} : C'est un processus \texttt{gunicorn} qui sert l'application web sur le port \texttt{8000} sur \texttt{localhost}.
@@ -222,19 +222,23 @@ Commande : \texttt{systemctl start/stop/status ntp.service}
 
 \texttt{Celery} : Celery est un ``worker'' : il écoute sur le ``message broker'' (le \texttt{redis} qui tourne sur l'autre machine) en attendant des ordres.
 Dès qu'il recoit une tache, il l'exécute et renvoie le résultat au ``message broker''.
+C'est \texttt{Celery} qui récupérera les fichiers sur le \texttt{nfs}, créera une \texttt{jail}, y compilera le \LaTeX, etc.
 Commande : \texttt{service celery start/stop}
 
 \texttt{ClamAV} : c'est l'outil qui nous permet de détecter des signatures de virus dans les pdf.
 Celui-ci est découpé en deux daemons :
         \begin{itemize}
-            \item \texttt{clamd} : le processus qui vérifie les fichiers
+            \item \texttt{clamd} : le processus qui vérifie les fichiers.
 
-            (\texttt{/usr/local/etc/rc.d/clamav-clamd start/stop})
+            Il est accessible depuis \texttt{unix://var/run/clamav/clamd.sock}
+
+            (Commande : \texttt{/usr/local/etc/rc.d/clamav-clamd start/stop})
             \item \texttt{freshclam} s'occupe de garder la base de signatures à jour.
 
-            (\texttt{/usr/local/etc/rc.d/clamav-freshclam start/stop})
+            (Commande : \texttt{/usr/local/etc/rc.d/clamav-freshclam start/stop})
         \end{itemize}
 
+\vspace{1em} % wtf latex
 Client \texttt{nfs} : il se connecte à la machine \texttt{debian} et permet à \texttt{Celery} d'avoir accès aux fichiers téléversés sur l'autre machine ainsi qu'à renvoyer les fichiers compilés.
 Commande : \texttt{service nfsclient start/stop} ainsi que \texttt{mount /mnt} et \texttt{umount /mnt}
 
