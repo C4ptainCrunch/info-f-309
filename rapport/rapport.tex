@@ -326,6 +326,35 @@ en tant que \texttt{celery} il faut exécuter \texttt{git pull}
 epuis le dossier \texttt{/home/celery/info-f-309}
 et ensuite en tant que \texttt{root} exécuter \texttt{service restart celery}.
 
+Pour mettre à jour le modèle des jails, il faut tout d'abord mettre à jour le serveur comme expliqué ci-dessus et refaire un buildworld comme expliqué plus-haut (\ref{subs:Contrôle des BSDJails}). On crée ensuite un dossier et on y installe un le nouveau modèle.
+\begin{lstlisting}[language=bash]
+  mkdir /home/j/mroot2
+  cd /usr/src
+  make installworld DESTDIR=/home/j/mroot2
+  make distribution DESTDIR=/home/j/mroot2
+  cd /home/j/mroot2
+  cpdup /usr/src usr/src
+  mkdir s
+\end{lstlisting}
+Certains des nouveaux dossiers installés seront inutiles, puisqu'ils existeront déjà dans \texttt{/home/j/skel}. Il faudra également réinstaller la distribution \LaTeX.
+\begin{lstlisting}[language=bash]
+  chroot /home/j/mroot2
+  pkg update && pkg install texlive-full
+  exit
+  rm -R etc root tmp home
+  cd /home/j/mroot2
+  mkdir s
+  ln -s s/etc etc
+  ln -s s/root root
+  ln -s s/home home
+  ln -s s/tmp tmp
+\end{lstlisting}
+Il faut ensuite s'assurer que plus aucune jail ne tourne. Si c'est le cas, on peut dès lors supprimer l'ancien mroot et renommer mroot2 en mroot:
+\begin{lstlisting}[language=bash]
+  rm /home/j/mroot
+  mv /home/j/mroot2 /home/j/mroot
+\end{lstlisting}
+
 \newpage
 \begin{appendices}
   \section{Fichiers de configuration}
