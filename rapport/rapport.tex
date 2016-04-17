@@ -58,6 +58,15 @@ La première machine a pour tâche la mise en service de l'interface web, ainsi 
 
 La seconde machine reçoit les sources à compiler, crée des BSDJails à la volée, y lance les compilations et l'analyse antivirus et renvoie le document final à la première machine.
 
+\section{Choix effectués}
+\label{sec:Choix effectués}
+
+Le partage des fichiers entre les deux serveurs est géré par la mise en place d'un protocole NFS.
+
+L'application web est réalisée grâce au framework Django pour Python 3.
+
+
+
 \section{Serveur web (Machine Debian)}
 \subsection{Services}
 \begin{itemize}
