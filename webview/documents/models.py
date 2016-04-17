@@ -10,7 +10,7 @@ class Document(models.Model):
             )
     titre = models.CharField(max_length=255)
     status = models.CharField(max_length=20, choices=STATES, default='W', db_index=True, verbose_name='État')
-    zipFile = models.FileField(upload_to="uploads/", blank=True, null=True)
+    zipFile = models.FileField(upload_to="uploads/")
     pdf = models.FileField(upload_to="pdf/", blank=True, null=True)
     clean = models.BooleanField(default=False)
 
