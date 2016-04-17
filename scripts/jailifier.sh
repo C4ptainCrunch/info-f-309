@@ -16,6 +16,8 @@ mkdir "$JS/$1"
 # unzip and send sources to jail
 echo unzip and send sources to jail
 unzip "$2" -d "$JS/$1/home"
+texFile=$(find "$JS/$1/home" -name "*.tex" | head -n 1)
+texDir=$(dirname "$texFile")
 
 # mounting jail
 echo mounting jail
@@ -29,9 +31,9 @@ sudo jail -c path="$J/$1" name="$1" persist
 
 # compiling latex + clamav + moving pdf output #TODO: path
 echo compile
-sudo jexec "$1" sh -c 'cd /home && latexmk -pdf'
-echo move "$JS/$1/home/"*".pdf" to "/tmp/$1.pdf"
-mv "$JS/$1/home/"*".pdf" "/tmp/compile/$1.pdf"
+sudo jexec "$1" sh -c 'cd ${texDir#$JS/$1} && latexmk -pdf'
+echo move "$texDir/"*".pdf" to "/tmp/compile/$1.pdf"
+mv "$texDir/"*".pdf" "/tmp/compile/$1.pdf"
 
 # stopping jail + folder deletion
 echo stopping jail + folder deletion
