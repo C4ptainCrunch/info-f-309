@@ -18,13 +18,13 @@ def check_clamav(document_id):
     clam = clamd.ClamdUnixSocket(settings.CLAMAV_SOCKET)
     status, sig = clam.scan(absolute_path_to_pdf)[absolute_path_to_pdf]
     if status == 'OK':
-        document.clean = True
+        document.isClean = True
     elif status == 'FOUND':
-        document.clean = False
+        document.isClean = False
         print("Signature found", sig)
     else:
         # unknown state
-       document.clean = False
+       document.isClean = False
        print("Unknown return of clamav", status, sig)
 
     document.save()
