@@ -297,20 +297,13 @@ A nouveau en root :
 Vous pouvez vérifier que celery tourne bien en allant regarder son pid
 dans \texttt{/var/run/celery/celery.pid}
 
-Configuration de ClamAV:
-En root :
-    # démarage à la main de freshclam pour télécharger
-    # la base de signatures
-    service clamav-freshclam onestart
-    # attendre quelques minutes qu'elle soit téléchargée
-    sleep 300
-    # démarer le daemon à la main et vérifier qu'il
-    # accepte de lire la base de signatures
-    service clamav-clamd onestart
-    # ajouter `clamav_freshclam_enable="YES"' et `clamav_clamd_enable="YES"'
-    # dans /etc/rc.conf
-
 \end{lstlisting}
+\subsection{Configuration de ClamAV}
+\begin{enumerate}
+  \item démarrage de freshclam, pour télécharger la base de signatures, avec \emph{service clamav-freshclam onestart}
+  \item démarrage du daemon avec \emph{service clamav-clamd onestart}
+  \item ajouter dans \texttt{/etc/rc.conf} les lignes ``clamav\_freshclam\_enable="YES"'' et ``clamav\_clamd\_enable="YES"''
+\end{enumerate}
 
 \newpage
 \begin{appendices}
