@@ -137,7 +137,7 @@ Ensuite, nous allons déplacer les dossiers accessibles en lecture-écriture dan
 \end{lstlisting}
 Nous avons dès lors notre modèle pour la création de jails.
 
-Voici maintenant un exemple de création d'une jail, nommée example. On commence par créer les dossiers contenant la jail, le premier simplement avec \emph{mkdir}, le deuxième avec la commande \emph{cpdup}, qui crée une exacte réplique du fichier source. On peut ensuite les monter grâce aux commandes \emph{mount_nullfs} et \emph{mount}. Cette première commande permet d'accéder à des fichiers depuis différents emplacements.
+Voici maintenant un exemple de création d'une jail, nommée example. On commence par créer les dossiers contenant la jail, le premier simplement avec \emph{mkdir}, le deuxième avec la commande \emph{cpdup}, qui crée une exacte réplique du fichier source. On peut ensuite les monter grâce aux commandes \emph{mount\_nullfs} et \emph{mount}. Cette première commande permet d'accéder à des fichiers depuis différents emplacements.
 \begin{lstlisting}[language=bash]
   mkdir /home/j/example
   cpdup /home/j/skel /home/js/example
@@ -218,7 +218,6 @@ Celui-ci est découpé en deux daemons :
 
             (\texttt{/usr/local/etc/rc.d/clamav-freshclam start/stop})
         \end{itemize}
-\end{itemize}
 
 Client \texttt{nfs} : il se connecte à la machine \texttt{debian} et permet à \texttt{Celery} d'avoir accès aux fichiers téléversés sur l'autre machine ainsi qu'à renvoyer les fichiers compilés.
 Commande : \texttt{service nfsclient start/stop} ainsi que \texttt{mount /mnt} et \texttt{umount /mnt}
