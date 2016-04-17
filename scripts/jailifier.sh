@@ -31,7 +31,7 @@ sudo jail -c path="$J/$1" name="$1" persist
 echo compile
 sudo jexec "$1" sh -c 'cd /home && latexmk -pdf'
 echo move "$JS/$1/home/"*".pdf" to "/tmp/$1.pdf"
-mv "$JS/$1/home/"*".pdf" "/tmp/$1.pdf"
+mv "$JS/$1/home/"*".pdf" "/tmp/compile/$1.pdf"
 
 # stopping jail + folder deletion
 echo stopping jail + folder deletion

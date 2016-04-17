@@ -21,10 +21,10 @@ def compile_tex(document_id):
     ferr = open("/tmp/compile-%d.stderr" % document.id, "w")
     try:
         subprocess.check_call(command, timeout=1800, stdout=fout, stderr=ferr)
-        f = File(open("/tmp/%d.pdf" % document.id, "rb"), 'rb')
+        f = File(open("/tmp/compile/%d.pdf" % document.id, "rb"), 'rb')
         name = re.sub('[^A-Za-z0-9_]', '', document.titre.replace(" ", "_")) + ".pdf"
         document.pdf.save(name, f)
-        os.remove("/tmp/%d.pdf" % document.id)
+        os.remove("/tmp/compile/%d.pdf" % document.id)
         document.status = "D"
         document.save()
     except subprocess.CalledProcessError as e:
