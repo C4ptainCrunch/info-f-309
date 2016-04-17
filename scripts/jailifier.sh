@@ -31,7 +31,7 @@ sudo jail -c path="$J/$1" name="$1" persist
 
 # compiling latex + clamav + moving pdf output #TODO: path
 echo compile file in ${texDir#$JS/$1}
-sudo jexec "$1" sh -c 'cd ${texDir#$JS/$1} && latexmk -pdf'
+sudo jexec "$1" sh -c "cd ${texDir#$JS/$1} && latexmk -pdf"
 echo move "$texDir/"*".pdf" to "/tmp/compile/$1.pdf"
 mv "$texDir/"*".pdf" "/tmp/compile/$1.pdf"
 
