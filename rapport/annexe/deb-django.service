@@ -1,15 +1,18 @@
 [Unit]
 Description=Production version of hubdoc.be
+# Services nécessaires, ceux à exécuter après et avant
 Requires=nginx.service postgresql.service
 Before=nginx.service
 After=postgresql.service
 
 [Service]
+# Répertoire contenant les sources django
 WorkingDirectory=/var/www/info-f-309/webview
 PIDFile=/run/hubdoc_be_django.pid
 Type=forking
 KillMode=process
 Restart=restart-always
+# Commande à exécuter pour démarrer l'application
 ExecStart=/var/www/info-f-309/webview/ve/bin/gunicorn           \
           --group www-data                                      \
           --user www-data                                       \

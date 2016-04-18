@@ -11,7 +11,7 @@ rcvar=`set_rcvar`
 start_cmd="${name}_start"
 stop_cmd="${name}_stop"
 
-
+# commande à exécuter pour démarrer le daemon celery
 celery_start()
 {
     echo "Starting celery"
@@ -23,6 +23,7 @@ celery_start()
     --uid=celery --gid=celery -l INFO --detach
 }
 
+# commande pour connaître l'état de celery
 celery_status()
 {
     /home/celery/info-f-309/webview/ve/bin/python \
@@ -33,6 +34,7 @@ celery_status()
     --uid=celery --gid=celery
 }
 
+# commande pour stopper celery
 celery_stop()
 {
     kill $(cat /var/run/celery/celeryd.pid)
