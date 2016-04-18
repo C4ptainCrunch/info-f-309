@@ -140,7 +140,7 @@ Pour terminer il faut créer le dossier dans lequel se trouveront les fichiers �
 \subsubsection{\texttt{nginx}}
 
 Nous devons créer un virtualhost \texttt{nginx} pour reverse-proxifier \texttt{gunicorn}.
-Il faut placer \ref{sub:etc-nginx-sa-hubdoc} dans \texttt{/etc/nginx/sites-available/hubdoc.be}
+Il faut éditer \texttt{/etc/nginx/sites-available/hubdoc.be} comme dans l'annexe (\ref{subs:deb-nginx-sites-avail-hubdoc})
 puis créer un lien symbolique dans \texttt{sites-enabled} pour l'acitver et pour finir,
 recharger la configuration :
 \begin{lstlisting}[language=bash]
@@ -428,6 +428,15 @@ Cela fait, les commandes mentionnées pourront être utilisées sans mot de pass
   \subsubsection{/etc/exports}
   \label{subs:etc-exports}
   \lstinputlisting[basicstyle=\ttfamily]{annexe/deb-etc-exports}
+
+  \section{Fichiers de configuration de la machine Debian}
+  \subsubsection{/var/www/info-f-309/webview/webview/local\_settings.py}
+  \label{subs:deb-webview-local-settings}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/deb-webview-local-settings.py}
+
+  \subsubsection{/etc/nginx/sites-available/hubdoc.be}
+  \label{subs:deb-nginx-sites-avail-hubdoc}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/deb-nginx-sites-available-hubdoc}
 
   \section{Fichiers de configuration de la machine FreeBSD}
 
