@@ -422,8 +422,8 @@ Puis on démonte tous les dossiers montés et on peut enfin les supprimer.
 
 \subsection{Configuration du NFS}
 \begin{enumerate}
-  \item ajouter \texttt{nfs\_client\_enable="YES"} dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf})
-  \item démarrer le service avec \texttt{service nfsclient start}
+  \item ajouter \texttt{nfs\_client\_enable="YES"}, \texttt{rpc\_lockd\_enable="YES"} et \texttt{rpc\_statd\_enable="YES"} dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf})
+  \item démarrer le service avec \texttt{service nfsclient start}, \texttt{service lockd start} et \texttt{service statd start}
   \item ajouter la ligne \texttt{192.81.220.4:/var/nfs        /mnt        nfs        rw        0        0} à \texttt{/etc/fstab} (\ref{subs:etc-fstab})
   \item remonter le sytème de fichier défini dans le fstab avec \texttt{mount -a}
 \end{enumerate}
@@ -551,7 +551,9 @@ Cela fait, les commandes mentionnées pourront être utilisées sans mot de pass
 \label{sec:Scripts et applications}
 
 \subsection{Application web Django}
-Une application web a été réalisée avec le framework django. Ses sources sont disponibles sur \url{https://github.com/C4ptainCrunch/info-f-309}. La partie la plus intéressante se situe dans \texttt{info-f-309/webview/documents/tasks.py}, qui contient le code des tâches effectuées avec Celery.
+Une application web a été réalisée avec le framework django.\\ Ses sources sont disponibles sur \url{https://github.com/C4ptainCrunch/info-f-309}.
+
+La partie la plus intéressante se situe dans \texttt{info-f-309/webview/documents/tasks.py}, qui contient le code des tâches effectuées avec Celery.
 \lstinputlisting[basicstyle=\ttfamily, language=python]{../webview/documents/tasks.py}
 
 \subsubsection{Utilisation des BSDJails pour la compilation \LaTeX}
