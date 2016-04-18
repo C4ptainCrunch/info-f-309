@@ -86,6 +86,7 @@ Commande : \texttt{systemctl start/stop/status nginx.service}
 Il sert une unique base de données : \texttt{webview} qui est utilisée par l'application web.
 Il écoute en local sur un socket UNIX ansi que sur l'interface publique (retreinte par le firewall) sur le port \texttt{5432}.
 Commande : \texttt{systemctl start/stop/status nginx.service}
+Fichiers de Configuration: \ref{subs:deb-pg-hba} et 
 
 \texttt{Redis} est utilisé comme message broker entre \texttt{Celery} et l'application web.
 Celui-ci écoute sur toutes les interfaces (l'interface publique est restreinte par le firewall) sur le port \texttt{6379} et demande un mot de passe.
@@ -441,6 +442,10 @@ Cela fait, les commandes mentionnées pourront être utilisées sans mot de pass
   \subsubsection{/etc/systemd/system/django.service}
   \label{subs:deb-django-service}
   \lstinputlisting[basicstyle=\ttfamily]{annexe/deb-django.service}
+
+  /subsubsection{/etc/postgresql/9.4/main/pg_hba.conf}
+  \label{subs:deb-pg-hba}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/deb-pg-hba.conf}
 
   \section{Fichiers de configuration de la machine FreeBSD}
 
