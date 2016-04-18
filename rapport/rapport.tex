@@ -121,8 +121,8 @@ Nous avons choisi de partager \texttt{/var/nfs}. Pour cela, il faut le créer et
   chown nobody:nogroup /var/nfs
 \end{lstlisting}
 
-Ensuite il faut éditer \texttt{/etc/exports} puis y ajouter le chemin vers
-le dossier ainsi que les ip des machines autorisées à s'y connecter. (Voir \ref{sub:etc-exports})
+Ensuite il faut éditer \texttt{/etc/exports} (\ref{subs:etc-exports}) puis y ajouter le chemin vers
+le dossier ainsi que les ip des machines autorisées à s'y connecter.
 
 Après avoir éditer ce fichier, il faut prévenir le daemon qu'il a changé et démarrer le serveur :
 \begin{lstlisting}[language=bash]
@@ -424,7 +424,12 @@ Cela fait, les commandes mentionnées pourront être utilisées sans mot de pass
 
 \newpage
 \begin{appendices}
-  \section{Fichiers de configuration}
+  \section{Fichiers de configuration de la machine Debian}
+  \subsubsection{/etc/exports}
+  \label{subs:etc-exports}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/deb-etc-exports}
+
+  \section{Fichiers de configuration de la machine FreeBSD}
 
   \subsection{/etc/src.conf}
   \label{sub:etc-src-conf}
