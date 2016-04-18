@@ -153,8 +153,8 @@ Pour terminer il faut créer le dossier dans lequel se trouveront les fichiers �
 \subsubsection{\texttt{nginx}}
 
 Nous devons créer un virtualhost \texttt{nginx} pour reverse-proxifier \texttt{gunicorn}.
-Il faut éditer \texttt{/etc/nginx/sites-available/hubdoc.be} comme dans l'annexe (\ref{subs:deb-nginx-sites-avail-hubdoc})
-puis créer un lien symbolique dans \texttt{sites-enabled} pour l'acitver et pour finir,
+Il faut éditer \\\texttt{/etc/nginx/sites-available/hubdoc.be} comme dans l'annexe (\ref{subs:deb-nginx-sites-avail-hubdoc})
+puis créer un lien symbolique dans \texttt{sites-enabled} pour l'activer et pour finir,
 recharger la configuration :
 \begin{lstlisting}[language=bash]
   ln -s /etc/nginx/sites-available/hubdoc.be /etc/nginx/sites-enabled/
@@ -177,7 +177,7 @@ Pour finir, redémarrez le service : \texttt{systemctl restart redis-server.serv
 \subsubsection{\texttt{postgesql}}
 
 Il faut autoriser la machine bsd à se connecter à \texttt{postgesql}.
-Pour cela, il faut éditer \texttt{/etc/postgresql/9.4/main/pg\_hba.conf} (\ref{subs:deb-pg-hba}) et rajouter :
+Pour cela, il faut éditer \\\texttt{/etc/postgresql/9.4/main/pg\_hba.conf} (\ref{subs:deb-pg-hba}) et rajouter :
 \begin{lstlisting}[language=bash]
   host  all  all 146.185.151.186/32  md5
 \end{lstlisting}
@@ -187,7 +187,7 @@ En dessous de la ligne
 \end{lstlisting}
 
 Ensuite il faut demander à \texttt{postgesql} d'écouter sur toutes les interfaces :
-Dans \texttt{/etc/postgresql/9.4/main/postgresql.conf}, changez
+Dans \\\texttt{/etc/postgresql/9.4/main/postgresql.conf}, changez
 \begin{lstlisting}[language=bash]
   #listen_addresses = 'localhost'
 \end{lstlisting}
@@ -257,7 +257,7 @@ Après, on peut collecter les fichiers statiques et remplir la base de données 
 \end{lstlisting}
 
 Pour finir, il faut installer pui démarrer le service \texttt{systemd} :
-déposez le fichier \ref{subs:deb-django-service} dans \texttt{/etc/systemd/system/django.service} puis exécutez :
+déposez le fichier \ref{subs:deb-django-service} dans \\\texttt{/etc/systemd/system/django.service} puis exécutez :
 \begin{lstlisting}[language=bash]
   systemctl daemon-reload
   systemctl enable django
@@ -276,7 +276,7 @@ il faut exécuter \texttt{git pull} depuis le dossier \texttt{/var/www/info-f-30
 et ensuite en tant que \texttt{root} exécuter \texttt{systemctl restart django}.
 
 Dans le cas ou le schéma de la base de donnée aurait changé,
-il faut aussi exécuter \texttt{/var/www/info-309/webview/ve/bin/python /var/www/info-309/webview/manage.py migrate} depuis l'utilisateur \texttt{www-data}.
+il faut aussi exécuter \\\texttt{/var/www/info-309/webview/ve/bin/python /var/www/info-309/webview/manage.py migrate} depuis l'utilisateur \texttt{www-data}.
 
 \section{Serveur de compilation (Machine BSD)}
 \subsection{Services}
