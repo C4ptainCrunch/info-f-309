@@ -54,7 +54,7 @@
 Le but de ce projet est de permettre à nos clients la compilation en ligne de documents rédigés au format \LaTeX sur un serveur distant.
 
 Pour cela, une interface web sera mise en place afin de téléverser une archive contenant les sources du document à compiler.
-Puis, à la réception de ce document, le serveur enverra les sources dans une BSDJail afin qu'elles soient traitées sans posssibilité de compromission de celui-ci.
+Puis, à la réception de ce document, le serveur enverra les sources dans une BSDJail afin qu'elles soient traitées sans possibilité de compromission de celui-ci.
 
 \section{Machines déployées}
 \label{sec:Machines déployées}
@@ -91,7 +91,7 @@ Commande : \texttt{systemctl start/stop/status nginx.service}
 
 \texttt{Postgresql} : le serveur de base de données.
 Il sert une unique base de données : \texttt{webview} qui est utilisée par l'application web.
-Il écoute en local sur un socket UNIX ansi que sur l'interface publique (retreinte par le firewall) sur le port \texttt{5432}.
+Il écoute en local sur un socket UNIX ansi que sur l'interface publique (restreinte par le firewall) sur le port \texttt{5432}.
 Commande : \texttt{systemctl start/stop/status nginx.service}
 
 \texttt{Redis} est utilisé comme message broker entre \texttt{Celery} et l'application web.
@@ -105,7 +105,7 @@ Serveur \texttt{nfs} : le répertoire \texttt{/var/nfs} est partagé avec la mac
 Dans celui-ci se trouve \texttt{/var/nfs/webview/media} dans lequel sont stockés tous les fichiers media de Django (principalement les fichiers \texttt{zip} et \texttt{pdf}).
 Commande : \texttt{systemctl start/stop/status nfs-kernel-server.service}
 
-\texttt{NTP} : vu que nous travaillons sur plusieurs machines en parralèlle, il est indispensable d'avoir la même heure partout.
+\texttt{NTP} : vu que nous travaillons sur plusieurs machines en parallèle, il est indispensable d'avoir la même heure partout.
 C'est le travail de \texttt{NTP}.
 Commande : \texttt{systemctl start/stop/status ntp.service}
 
@@ -165,7 +165,7 @@ recharger la configuration :
 
 Vu que qu'il sera accessible de l'extérieur,
 il faut demander à \texttt{redis} d'exiger un mot de passe.
-Pour cela, editez \texttt{/etc/redis/redis.conf} et décommentez \texttt{requirepass}
+Pour cela, éditez \texttt{/etc/redis/redis.conf} et décommentez \texttt{requirepass}
 et changez le mot de passe qui est à côté.
 
 Il faut aussi lui demander d'écouter sur toutes les interfaces.
@@ -201,7 +201,7 @@ Puis redémarrez le service : \texttt{systemctl restart postgresql}.
 \texttt{Django} a besoin d'une base de données.
 Pour la créer, il faut exécuter en tant que \texttt{postgres} :
 \begin{lstlisting}[language=bash]
-  createuser -P www-data # assignez un mot de passe à l'utilisteur
+  createuser -P www-data # assignez un mot de passe à l'utilisateur
   createdb -O www-data webbview
 \end{lstlisting}
 
@@ -268,7 +268,7 @@ déposez le fichier \ref{subs:deb-django-service} dans \\\texttt{/etc/systemd/sy
 \subsection{Mise à jour}
 
 Dans le cas ou l'on voudrait mettre à jour ce serveur,
-il faut exéccuter ces deux commandes en tant que root :
+il faut exécuter ces deux commandes en tant que root :
 \texttt{apt-get update}, \texttt{apt-get upgrade}.
 
 Pour mettre à jour l'application web, en tant que \texttt{www-data}
@@ -282,7 +282,7 @@ il faut aussi exécuter \\\texttt{/var/www/info-309/webview/ve/bin/python /var/w
 \subsection{Services}
 
 \texttt{Celery} : Celery est un ``worker'' : il écoute sur le ``message broker'' (le \texttt{redis} qui tourne sur l'autre machine) en attendant des ordres.
-Dès qu'il recoit une tache, il l'exécute et renvoie le résultat au ``message broker''.
+Dès qu'il reçoit une tache, il l'exécute et renvoie le résultat au ``message broker''.
 C'est \texttt{Celery} qui récupérera les fichiers sur le \texttt{nfs}, créera une \texttt{jail}, y compilera le \LaTeX, etc.
 Commande : \texttt{service celery start/stop}
 
@@ -376,7 +376,7 @@ Ensuite, nous allons déplacer les dossiers accessibles en lecture-écriture dan
 \end{lstlisting}
 Nous avons dès lors notre modèle pour la création de jails.
 
-Voici maintenant un exemple de création d'une jail, nommée example.
+Voici maintenant un exemple de création d'une jail, nommée exemple.
 On commence par créer les dossiers contenant la jail, le premier simplement avec \texttt{mkdir},
 le deuxième avec la commande \texttt{cpdup}, qui crée une exacte réplique du fichier source.
 On peut ensuite les monter grâce aux commandes \texttt{mount\_nullfs} et \texttt{mount}.
@@ -399,7 +399,7 @@ Là, on peut utiliser la commande \texttt{jail} afin de lancer une jail:
 Afin d'accéder à cette jail depuis l'extérieur, il suffit d'accéder à l'emplacement où celle-ci se situe.
 Pour lancer une commande à l'intérieur de cette jail,
 on utilise la commande \texttt{jexec} dont le premier argument est soit le nom de la jail,
-soit son jid (qui peut être déterminé grâce à la commande \texttt{jls}),
+soit son \texttt{jid} (qui peut être déterminé grâce à la commande \texttt{jls}),
 et les autres arguments correspondent à la commande à exécuter.
 Par exemple, pour ajouter un fichier \texttt{test.txt} dans la jail depuis l'extérieur et le lister depuis l'intérieur:
 \begin{lstlisting}[language=bash]
@@ -457,7 +457,7 @@ Il faut ensuite créer des dossiers pour sauvegarder les pid et les logs de Cele
   sudo chown celery:celery /var/run/celery/
 \end{lstlisting}
 
-Les sources du programme étant sur le site d'hébergement Github, l'user celery va cloner le dépôt dans sa home, initialiser un virtualenv et installer les dépendances.
+Les sources du programme étant sur le site d'hébergement Github, l'user \texttt{celery} va cloner le dépôt dans sa home, initialiser un virtualenv et installer les dépendances.
 \begin{lstlisting}[language=bash]
   su celery
   cd      # retourner dans la home de celery
@@ -488,14 +488,14 @@ On peut vérifier que celery tourne bien en allant regarder son pid dans \texttt
 \end{enumerate}
 
 \subsection{Utilisation des BSDJails par Celery}
-Afin de pouvoir envoyer des fichiers dans les jails et effectuer des actions sur ceux-ci, l'utilisateur celery doit à la fois avoir les droits de lecture et écriture dans le dossier des jails, mais également le droit d'intéragir avec celles-ci.
+Afin de pouvoir envoyer des fichiers dans les jails et effectuer des actions sur ceux-ci, l'utilisateur celery doit à la fois avoir les droits de lecture et écriture dans le dossier des jails, mais également le droit d'interagir avec celles-ci.
 
 Il est aisé de donner les droits de lecture et d'écriture: il suffit de modifier le propriétaire de \texttt{/home/j} et \texttt{/home/js} pour qu'il soit \texttt{celery}:
 \begin{lstlisting}[language=bash]
   chown celery:celery /home/j/mroot /home/j/skel
 \end{lstlisting}
 
-Pour avoir le droit d'intéragir avec les jails, il aura fallut modifier le fichier sudoers
+Pour avoir le droit d'interagir avec les jails, il aura fallut modifier le fichier sudoers
 en ajoutant ces lignes grâce à la commande \texttt{visudo}:
 \begin{lstlisting}
   celery ALL=(ALL) NOPASSWD: /sbin/mount
@@ -511,15 +511,15 @@ Cela fait, les commandes mentionnées pourront être utilisées sans mot de pass
 \subsection{Mise à jour}
 
 Dans le cas ou l'on voudrait mettre à jour ce serveur,
-il faut exéccuter ces deux commandes en tant que root :
+il faut exécuter ces deux commandes en tant que root :
 \texttt{freebsd-update fetch} puis \texttt{freebsd-update install}.
 
 Pour mettre à jour les tâches \texttt{Celery},
 en tant que \texttt{celery} il faut exécuter \texttt{git pull}
-epuis le dossier \texttt{/home/celery/info-f-309}
+puis le dossier \texttt{/home/celery/info-f-309}
 et ensuite en tant que \texttt{root} exécuter \texttt{service restart celery}.
 
-Pour mettre à jour le modèle des jails, il faut tout d'abord mettre à jour le serveur comme expliqué ci-dessus et refaire un buildworld comme expliqué plus-haut (\ref{subs:Contrôle des BSDJails}). On crée ensuite un dossier et on y installe un le nouveau modèle :
+Pour mettre à jour le modèle des jails, il faut tout d'abord mettre à jour le serveur comme expliqué ci-dessus et refaire un buildworld comme expliqué plus haut (\ref{subs:Contrôle des BSDJails}). On crée ensuite un dossier et on y installe un le nouveau modèle :
 \begin{lstlisting}[language=bash]
   mkdir /home/j/mroot2
   cd /usr/src
