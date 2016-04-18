@@ -165,12 +165,27 @@ Pour finir, redémarrez le service : \texttt{systemctl restart redis-server.serv
 
 \subsubsection{\texttt{postgesql}}
 
-    dans /etc/postgresql/9.4/main/pg_hba.conf ajouter la ligne:
-        host    all             all             146.185.151.186/32            md5
-        (en deessous de: host    all             all             127.0.0.1/32            md5)
-    dans vim /etc/postgresql/9.4/main/postgresql.conf:
-        changer #listen_addresses = 'localhost' par listen_addresses = '*'
-    systemctl restart postgresql
+Il faut autoriser la machine bsd à se connecter à \texttt{postgesql}.
+Pour cela, il faut éditer \texttt{/etc/postgresql/9.4/main/pg\_hba.conf} et rajouter :
+\begin{lstlisting}[language=bash]
+  host  all  all 146.185.151.186/32  md5
+\end{lstlisting}
+En dessous de la ligne
+\begin{lstlisting}[language=bash]
+  host  all  all 127.0.0.1/32        md5
+\end{lstlisting}
+
+Ensuite il faut demander à \texttt{postgesql} d'écouter sur toutes les interfaces :
+Dans \texttt{/etc/postgresql/9.4/main/postgresql.conf}, changez
+\begin{lstlisting}[language=bash]
+  #listen_addresses = 'localhost'
+\end{lstlisting}
+par
+\begin{lstlisting}[language=bash]
+  listen_addresses = '*'
+\end{lstlisting}
+
+Puis redémarrez le service : \texttt{systemctl restart postgresql}
 
 \texttt{Django} a besoin d'une base de données.
 Pour la créer, il faut exécuter en tant que \texttt{postgres} :
