@@ -148,6 +148,60 @@ recharger la configuration :
   systemctl reload nginx
 \end{lstlisting}
 
+\subsubsection{\texttt{redis}}
+
+Il faut demander à \texttt{redis} de demander un mot de passe.
+Pour cela, editez \texttt{/etc/redis/redis.conf} et décommentez \texttt{requirepass}
+et changez le mot de passe qui est à côté.
+
+Il faut aussi lui demander d'écouter sur toutes les interfaces.
+Pour cela, remplacez \texttt{bind 127.0.0.1} par \texttt{bind 0.0.0.0}
+
+Pour finir, redémarrez le service : \texttt{systemctl restart redis-server.service}
+
+
+\subsubsection{\texttt{postgesql}}
+
+Cette application a besoin d'une base de données. Pour la créer, il faut exécuter en tant que \texttt{postgres} :
+\begin{lstlisting}[language=bash]
+  createuser -P www-data # assignez un mot de passe à l'utilisteur
+  createdb -O www-data webbview
+\end{lstlisting}
+
+\subsubsection{\texttt{iptables}}
+
+...
+
+\subsubsection{\texttt{Django}}
+
+Il faut, en tant que \texttt{www-data}, récupérer les sources de l'application et installer les dépendances :
+\begin{lstlisting}[language=bash]
+  cd /var/www
+  git clone https://github.com/C4ptainCrunch/info-f-309.git
+  cd info-f-309/webview
+  virtualenv ve
+  source ve/bin/activate
+  pip install -r requirements.txt
+  pip install psycopg2
+\end{lstlisting}
+
+Ensuite il faut configurer l'application avec le fichier\\\texttt{/var/www/info-f-309/webview/local\_settings.py}.
+
+Après, on peut collecter les fichiers statiques et remplir la base de données :
+\begin{lstlisting}[language=bash]
+  ./manage.py collectstatic
+  ./manage.py migrate
+\end{lstlisting}
+
+Pour finir, il faut installer pui démarrer le service \texttt{systemd} :
+déposez le fichier \ref{etc-systemd-django} dans \texttt{/etc/systemd/system/django.service} puis exécutez :
+\begin{lstlisting}[language=bash]
+  systemctl daemon-reload
+  systemctl enable django
+  systemctl start django
+\end{lstlisting}
+
+
 \subsection{Mise à jour}
 
 Dans le cas ou l'on voudrait mettre à jour ce serveur,
