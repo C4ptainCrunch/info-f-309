@@ -6,6 +6,7 @@
 \usepackage{eurosym}
 \usepackage{listings}
 \usepackage{color}
+\usepackage{graphicx}
 \usepackage[titletoc,toc,title]{appendix}
 
 \author{Anthony \textsc{Caccia} \and Romain \textsc{Fontaine} \and Nikita \textsc{Marchant} }
@@ -59,12 +60,23 @@ Puis, à la réception de ce document, le serveur enverra les sources dans une B
 
 Deux machines ont été déployées: une première machine sur laquelle tourne la distribution GNU/Linux Debian, et une deuxième qui a pour système d'exploitation la distribution FreeBSD.
 
-La première machine a pour tâche la mise en service de l'interface web,
+La première machine a pour tâche la mise en service de l'interface web
+(voir les figures \ref{app1} et \ref{app2}),
 le stockage des fichiers \texttt{zip} et \texttt{pdf}
 ainsi que l'envoi des ordres de compilation sur la seconde machine.
 
 La seconde machine reçoit les ordres de compilation, crée des BSDJails à la volée, y place les sources récupérées sur la première machine,
 y lance les compilations et l'analyse antivirus et renvoie le document pdf final à la première machine.
+
+\begin{figure}[h]
+   \includegraphics[scale=0.4]{hubdoc.png}
+   \caption{\label{app1} Application web - Page d'accueil}
+\end{figure}
+
+\begin{figure}[!h]
+   \includegraphics[scale=0.4]{hubdoc-upload.png}
+   \caption{\label{app2} Application web - Page de téléversement}
+\end{figure}
 
 \section{Choix effectués}
 \label{sec:Choix effectués}
@@ -102,7 +114,10 @@ Dans celui-ci se trouve \texttt{/var/nfs/webview/media} dans lequel est stocké 
 C'est le travail de \texttt{NTP}.
 Commande : \texttt{systemctl start/stop/status ntp.service}
 
-\texttt{iptables} : % TODO rom1
+\texttt{iptables} : il sert de firewall pour les différents services devant être ouvert publiquement sur internet.
+Il protège le serveur Redis et le serveur Postgresql.
+Les commandes a utiliser pour ajouter des nouvelles règles sont \texttt{iptables} et \texttt{ip6tables}.
+Après cela, on utilise iptables-persistent pour conserver les règles après chaque reboot. Pour se faire il suffit de \texttt{iptables-save > /etc/iptables/rules.v4} et \texttt{ip6tables-save > /etc/iptables/rules.v6}.
 
 
 \subsection{Procédure d'installation}
@@ -148,6 +163,106 @@ recharger la configuration :
   ln -s /etc/nginx/sites-available/hubdoc.be /etc/nginx/sites-enabled/
   systemctl reload nginx
 \end{lstlisting}
+
+\subsubsection{\texttt{redis}}
+
+Il faut demander à \texttt{redis} de demander un mot de passe.
+Pour cela, editez \texttt{/etc/redis/redis.conf} et décommentez \texttt{requirepass}
+et changez le mot de passe qui est à côté.
+
+Il faut aussi lui demander d'écouter sur toutes les interfaces.
+Pour cela, remplacez \texttt{bind 127.0.0.1} par \texttt{bind 0.0.0.0}
+
+Pour finir, redémarrez le service : \texttt{systemctl restart redis-server.service}
+
+
+\subsubsection{\texttt{postgesql}}
+
+Il faut autoriser la machine bsd à se connecter à \texttt{postgesql}.
+Pour cela, il faut éditer \texttt{/etc/postgresql/9.4/main/pg\_hba.conf} et rajouter :
+\begin{lstlisting}[language=bash]
+  host  all  all 146.185.151.186/32  md5
+\end{lstlisting}
+En dessous de la ligne
+\begin{lstlisting}[language=bash]
+  host  all  all 127.0.0.1/32        md5
+\end{lstlisting}
+
+Ensuite il faut demander à \texttt{postgesql} d'écouter sur toutes les interfaces :
+Dans \texttt{/etc/postgresql/9.4/main/postgresql.conf}, changez
+\begin{lstlisting}[language=bash]
+  #listen_addresses = 'localhost'
+\end{lstlisting}
+par
+\begin{lstlisting}[language=bash]
+  listen_addresses = '*'
+\end{lstlisting}
+
+Puis redémarrez le service : \texttt{systemctl restart postgresql}
+
+\texttt{Django} a besoin d'une base de données.
+Pour la créer, il faut exécuter en tant que \texttt{postgres} :
+\begin{lstlisting}[language=bash]
+  createuser -P www-data # assignez un mot de passe à l'utilisteur
+  createdb -O www-data webbview
+\end{lstlisting}
+
+\subsubsection{\texttt{iptables}}
+Pour éviter d'avoir nos services accessible par tout le monde, nous utilisons iptables comme firewall.
+Pour ce faire, nous utilisons les commandes suivantes:
+
+
+Pour \texttt{Redis}:
+\begin{lstlisting}[language=bash]
+  iptables -A INPUT -p tcp --destination-port 6379 -j DROP
+  ip6tables -A INPUT -p tcp --destination-port 6379 -j DROP
+  iptables -I INPUT -p tcp -s 127.0.0.1 --dport 6379 -j ACCEPT
+  iptables -I INPUT -p tcp -s 146.185.151.186 --dport 6379 -j ACCEPT
+\end{lstlisting}
+
+Pour \texttt{Postgresql}:
+\begin{lstlisting}[language=bash]
+  iptables -A INPUT -p tcp --destination-port 5432 -j DROP
+  ip6tables -A INPUT -p tcp --destination-port 5432 -j DROP
+  iptables -I INPUT -p tcp -s 127.0.0.1 --dport 5432 -j ACCEPT
+  iptables -I INPUT -p tcp -s 146.185.151.186 --dport 5432 -j ACCEPT
+\end{lstlisting}
+
+Et pour garder de la persistance après chaque redémarrage:
+\begin{lstlisting}[language=bash]
+  iptables-save > /etc/iptables/rules.v4
+  ip6tables-save > /etc/iptables/rules.v6
+\end{lstlisting}
+
+\subsubsection{\texttt{Django}}
+
+Il faut, en tant que \texttt{www-data}, récupérer les sources de l'application et installer les dépendances :
+\begin{lstlisting}[language=bash]
+  cd /var/www
+  git clone https://github.com/C4ptainCrunch/info-f-309.git
+  cd info-f-309/webview
+  virtualenv ve
+  source ve/bin/activate
+  pip install -r requirements.txt
+  pip install psycopg2
+\end{lstlisting}
+
+Ensuite il faut configurer l'application avec le fichier\\\texttt{/var/www/info-f-309/webview/local\_settings.py}.
+
+Après, on peut collecter les fichiers statiques et remplir la base de données :
+\begin{lstlisting}[language=bash]
+  ./manage.py collectstatic
+  ./manage.py migrate
+\end{lstlisting}
+
+Pour finir, il faut installer pui démarrer le service \texttt{systemd} :
+déposez le fichier \ref{etc-systemd-django} dans \texttt{/etc/systemd/system/django.service} puis exécutez :
+\begin{lstlisting}[language=bash]
+  systemctl daemon-reload
+  systemctl enable django
+  systemctl start django
+\end{lstlisting}
+
 
 \subsection{Mise à jour}
 
