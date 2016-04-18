@@ -101,7 +101,10 @@ Dans celui-ci se trouve \texttt{/var/nfs/webview/media} dans lequel est stocké 
 C'est le travail de \texttt{NTP}.
 Commande : \texttt{systemctl start/stop/status ntp.service}
 
-\texttt{iptables} : % TODO rom1
+\texttt{iptables} : il sert de firewall pour les différents services devant être ouvert publiquement sur internet.
+Il protège le serveur Redis et le serveur Postgresql.
+Les commandes a utiliser pour ajouter des nouvelles règles sont \texttt{iptables} et \texttt{ip6tables}.
+Après cela, on utilise iptables-persistent pour conserver les règles après chaque reboot. Pour se faire il suffit de \texttt{iptables-save > /etc/iptables/rules.v4} et \texttt{ip6tables-save > /etc/iptables/rules.v6}.
 
 
 \subsection{Procédure d'installation}
