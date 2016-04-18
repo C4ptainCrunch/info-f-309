@@ -422,8 +422,8 @@ Puis on démonte tous les dossiers montés et on peut enfin les supprimer.
 
 \subsection{Configuration du NFS}
 \begin{enumerate}
-  \item ajouter \texttt{nfs\_client\_enable="YES"} dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf})
-  \item démarrer le service avec \texttt{service nfsclient start}
+  \item ajouter \texttt{nfs\_client\_enable="YES"}, \texttt{rpc\_lockd\_enable="YES"} et \texttt{rpc\_statd\_enable="YES"} dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf})
+  \item démarrer le service avec \texttt{service nfsclient start}, \texttt{service lockd start} et \texttt{service statd start}
   \item ajouter la ligne \texttt{192.81.220.4:/var/nfs        /mnt        nfs        rw        0        0} à \texttt{/etc/fstab} (\ref{subs:etc-fstab})
   \item remonter le sytème de fichier défini dans le fstab avec \texttt{mount -a}
 \end{enumerate}
