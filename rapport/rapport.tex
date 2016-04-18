@@ -83,6 +83,7 @@ y lance les compilations et l'analyse antivirus et renvoie le document pdf final
 
 \section{Serveur web (Machine Debian)}
 \subsection{Services}
+\label{services}
 Les services suivants tournent sur le premier serveur :
 
 \texttt{Nginx} : il sert de proxy http pour l'application \texttt{Django} et sert via http les fichiers \texttt{zip} et \texttt{pdf}.
@@ -303,14 +304,14 @@ Celui-ci est découpé en deux daemons :
 Client \texttt{nfs} : il se connecte à la machine Debian et permet à \texttt{Celery} d'avoir accès aux fichiers téléversés sur l'autre machine ainsi qu'à renvoyer les fichiers compilés.
 Commande : \texttt{service nfsclient start/stop} ainsi que \texttt{mount /mnt} et \texttt{umount /mnt}.
 
-\texttt{NTP} : même utilité que sur l'autre machine.
+\texttt{NTP} : même utilité que sur l'autre machine (voir \ref{services}).
 Commande : \texttt{service start/stop ntpd}.
 
 \subsection{Procédure d'installation}
 Pour commencer, il a fallu installer les paquets dont nous dépendons avec la commande \emph{pkg}:
 \begin{lstlisting}[language=bash]
   pkg update
-  pkg install bash zsh mosh git nginx python34 vim subversion
+  pkg install bash git nginx python34 vim subversion
   pkg install cpdup py34-sqlite3 py27-psycopg2 clamav
 \end{lstlisting}
 
