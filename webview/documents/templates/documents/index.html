@@ -17,7 +17,7 @@
         </thead>
         {% for document in documents_list %}
         <tr>
-            <td>
+            <td class={% if document.isClean %}"success"{% endif %}>
                 {% if document.pdf %}
                 <a href={{document.pdf.url}}>
                 {% endif %}
