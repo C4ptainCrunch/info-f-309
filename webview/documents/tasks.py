@@ -17,8 +17,8 @@ def compile_tex(document_id):
     script = os.path.join(settings.BASE_DIR, '../scripts', 'jailifier.sh')
     document = Document.objects.get(pk=document_id)
     command = ["sh", script, str(document.id), document.zipFile.path]
-    fout = open("/tmp/compile-%d.stdout" % document.id, "w")
-    ferr = open("/tmp/compile-%d.stderr" % document.id, "w")
+    fout = open("/var/log/celery/compilation/compile-%d.stdout" % document.id, "w")
+    ferr = open("/var/log/celery/compilation/compile-%d.stderr" % document.id, "w")
     try:
         subprocess.check_call(command, timeout=1800, stdout=fout, stderr=ferr)
         f = File(open("/tmp/compile/%d.pdf" % document.id, "rb"), 'rb')
