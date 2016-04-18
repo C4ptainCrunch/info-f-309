@@ -8,6 +8,7 @@
 \usepackage{color}
 \usepackage{graphicx}
 \usepackage[titletoc,toc,title]{appendix}
+\usepackage{fullpage}
 
 \author{Anthony \textsc{Caccia} \and Romain \textsc{Fontaine} \and Nikita \textsc{Marchant} }
 \date{}
@@ -117,7 +118,9 @@ Après cela, on utilise \texttt{iptables-persistent} pour conserver les règles 
 Premièrement, il faut installer tous les paquets dont nous avons besoin :
 \begin{lstlisting}[language=bash]
   apt-get update
-  apt-get install git sudo zsh python3 nginx htop mosh nfs-kernel-server vim redis-server postgresql-server python3 python3-dev ntpdate ntp screen iptables-persistent
+  apt-get install git sudo zsh python3 nginx \
+    nfs-kernel-server vim redis-server postgresql-server \
+    python3 python3-dev ntpdate ntp screen iptables-persistent
 \end{lstlisting}
 
 \subsubsection{\texttt{nfs}}
@@ -132,14 +135,14 @@ Nous avons choisi de partager \texttt{/var/nfs}. Pour cela, il faut le créer et
 Ensuite il faut éditer \texttt{/etc/exports} (\ref{subs:etc-exports}) puis y ajouter le chemin vers
 le dossier ainsi que les ip des machines autorisées à s'y connecter.
 
-Après avoir éditer ce fichier, il faut prévenir le daemon qu'il a changé et démarrer le serveur :
+Après avoir édité ce fichier, il faut prévenir le daemon qu'il a changé et démarrer le serveur :
 \begin{lstlisting}[language=bash]
   exportfs -a
   systemctl enable nfs-kernel-server
   systemctl start nfs-kernel-server
 \end{lstlisting}
 
-Pour terminer il faut créer le dossier dans lequel se trouveront les fichiers à partager :
+Pour terminer il faut créer le dossier dans lequel se trouveront les fichiers à partager et lui donner les bonnes permissions :
 \begin{lstlisting}[language=bash]
   mkdir -p /var/nfs/webview/media
   chown www-data:www-data /var/nfs/webview/
@@ -158,12 +161,13 @@ recharger la configuration :
 
 \subsubsection{\texttt{redis}}
 
-Il faut demander à \texttt{redis} de demander un mot de passe.
+Vu que qu'il sera accessible de l'extérieur,
+il faut demander à \texttt{redis} d'exiger un mot de passe.
 Pour cela, editez \texttt{/etc/redis/redis.conf} et décommentez \texttt{requirepass}
 et changez le mot de passe qui est à côté.
 
 Il faut aussi lui demander d'écouter sur toutes les interfaces.
-Pour cela, remplacez \texttt{bind 127.0.0.1} par \texttt{bind 0.0.0.0}
+Pour cela, remplacez \texttt{bind 127.0.0.1} par \texttt{bind 0.0.0.0}.
 
 Pour finir, redémarrez le service : \texttt{systemctl restart redis-server.service}
 
@@ -190,7 +194,7 @@ par
   listen_addresses = '*'
 \end{lstlisting}
 
-Puis redémarrez le service : \texttt{systemctl restart postgresql}
+Puis redémarrez le service : \texttt{systemctl restart postgresql}.
 
 \texttt{Django} a besoin d'une base de données.
 Pour la créer, il faut exécuter en tant que \texttt{postgres} :
@@ -201,7 +205,8 @@ Pour la créer, il faut exécuter en tant que \texttt{postgres} :
 
 \subsubsection{\texttt{iptables}}
 Pour éviter d'avoir nos services accessible par tout le monde, nous utilisons iptables comme firewall.
-Pour ce faire, nous utilisons les commandes suivantes:
+Pour ce faire, nous utilisons les commandes suivantes
+(\texttt{146.185.151.186} étant l'ip de la machine bsd):
 
 
 Pour \texttt{Redis}:
@@ -239,7 +244,9 @@ Il faut, en tant que \texttt{www-data}, récupérer les sources de l'application
   pip install psycopg2
 \end{lstlisting}
 
-Ensuite il faut configurer l'application avec le fichier\\\texttt{/var/www/info-f-309/webview/local\_settings.py}.
+Ensuite il faut configurer l'application avec le fichier\\
+\texttt{/var/www/info-f-309/webview/local\_settings.py}
+(voir \ref{fichier-annexe-local-settings})
 
 Après, on peut collecter les fichiers statiques et remplir la base de données :
 \begin{lstlisting}[language=bash]
@@ -267,7 +274,7 @@ il faut exécuter \texttt{git pull} depuis le dossier \texttt{/var/www/info-f-30
 et ensuite en tant que \texttt{root} exécuter \texttt{systemctl restart django}.
 
 Dans le cas ou le schéma de la base de donnée aurait changé,
-il faut aussi exécuter \texttt{/var/www/info-309/webview/ve/bin/python /var/www/info-309/webview/manage.py migrate}
+il faut aussi exécuter \texttt{/var/www/info-309/webview/ve/bin/python /var/www/info-309/webview/manage.py migrate} depuis l'utilisateur \texttt{www-data}.
 
 \section{Serveur de compilation (Machine BSD)}
 \subsection{Services}
@@ -550,7 +557,7 @@ Cela fait, les commandes mentionnées pourront être utilisées sans mot de pass
   \label{subs:deb-django-service}
   \lstinputlisting[basicstyle=\ttfamily]{annexe/deb-django.service}
 
-  /subsubsection{/etc/postgresql/9.4/main/pg_hba.conf}
+  \subsubsection{/etc/postgresql/9.4/main/pg\_hba.conf}
   \label{subs:deb-pg-hba}
   \lstinputlisting[basicstyle=\ttfamily]{annexe/deb-pg-hba.conf}
 
