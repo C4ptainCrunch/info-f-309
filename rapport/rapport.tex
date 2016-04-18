@@ -306,7 +306,7 @@ Commande : \texttt{service nfsclient start/stop} ainsi que \texttt{mount /mnt} e
 \texttt{NTP} : même utilité que sur l'autre machine.
 Commande : \texttt{service start/stop ntpd}.
 
-\subsection{Installation}
+\subsection{Procédure d'installation}
 Pour commencer, il a fallu installer les paquets dont nous dépendons avec la commande \emph{pkg}:
 \begin{lstlisting}[language=bash]
   pkg update
@@ -314,7 +314,7 @@ Pour commencer, il a fallu installer les paquets dont nous dépendons avec la co
   pkg install cpdup py34-sqlite3 py27-psycopg2 clamav
 \end{lstlisting}
 
-\subsection{Contrôle des BSDJails}
+\subsubsection{BSDJails}
 \label{subs:Contrôle des BSDJails}
 Afin de pouvoir créer des BSDJails, il nous faut d'abord construire un espace utilisateur de référence.
 Il nous faut pour cela mettre à jour les sources FreeBSD situées dans le dossier \texttt{/usr/src}:
@@ -420,7 +420,7 @@ Puis on démonte tous les dossiers montés et on peut enfin les supprimer.
   rm -rf /home/js/example
 \end{lstlisting}
 
-\subsection{Configuration du NFS}
+\subsubsection{\texttt{nfs}}
 \begin{enumerate}
   \item ajouter \texttt{nfs\_client\_enable="YES"}, \texttt{rpc\_lockd\_enable="YES"} et \texttt{rpc\_statd\_enable="YES"} dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf})
   \item démarrer le service avec \texttt{service nfsclient start}, \texttt{service lockd start} et \texttt{service statd start}
@@ -428,13 +428,13 @@ Puis on démonte tous les dossiers montés et on peut enfin les supprimer.
   \item remonter le sytème de fichier défini dans le fstab avec \texttt{mount -a}
 \end{enumerate}
 
-\subsection{Configuration du NTP}
+\subsubsection{\texttt{NTP}}
 \begin{enumerate}
   \item ajouter \texttt{ntpd\_enable="YES"} dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf})
   \item démarrer le service avec \texttt{service ntpd start}
 \end{enumerate}
 
-\subsection{Configuration de Celery}
+\subsubsection{\texttt{Celery}}
 On commence par créer un user \texttt{celery} avec la commande interactive \texttt{adduser}:
 \begin{description}
   \item[Username] celery
@@ -480,12 +480,33 @@ On peut maintenant démarrer Celery:
 
 On peut vérifier que celery tourne bien en allant regarder son pid dans \texttt{/var/run/celery/celery.pid}
 
-\subsection{Configuration de ClamAV}
+\subsubsection{\texttt{ClamAV}}
 \begin{enumerate}
   \item démarrage de freshclam, pour télécharger la base de signatures, avec \texttt{service clamav-freshclam onestart}
   \item démarrage du daemon avec \texttt{service clamav-clamd onestart}
   \item ajouter dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf}) les lignes \texttt{clamav\_freshclam\_enable="YES"} et\\ \texttt{clamav\_clamd\_enable="YES"}
 \end{enumerate}
+
+\subsection{Utilisation des BSDJails par Celery}
+Afin de pouvoir envoyer des fichiers dans les jails et effectuer des actions sur ceux-ci, l'utilisateur celery doit à la fois avoir les droits de lecture et écriture dans le dossier des jails, mais également le droit d'intéragir avec celles-ci.
+
+Il est aisé de donner les droits de lecture et d'écriture: il suffit de modifier le propriétaire de \texttt{/home/j} et \texttt{/home/js} pour qu'il soit \texttt{celery}:
+\begin{lstlisting}[language=bash]
+  chown celery:celery /home/j/mroot /home/j/skel
+\end{lstlisting}
+
+Pour avoir le droit d'intéragir avec les jails, il aura fallut modifier le fichier sudoers
+en ajoutant ces lignes grâce à la commande \texttt{visudo}:
+\begin{lstlisting}
+  celery ALL=(ALL) NOPASSWD: /sbin/mount
+  celery ALL=(ALL) NOPASSWD: /sbin/mount_nullfs
+  celery ALL=(ALL) NOPASSWD: /usr/sbin/jail
+  celery ALL=(ALL) NOPASSWD: /sbin/umount
+  celery ALL=(ALL) NOPASSWD: /bin/chflags
+  celery ALL=(ALL) NOPASSWD: /usr/sbin/jexec
+\end{lstlisting}
+Cela fait, les commandes mentionnées pourront être utilisées sans mot de passe par l'utilisateur \texttt{celery}.
+
 
 \subsection{Mise à jour}
 
@@ -526,26 +547,6 @@ Il faut ensuite s'assurer que plus aucune jail ne tourne. Si c'est le cas, on pe
   rm /home/j/mroot
   mv /home/j/mroot2 /home/j/mroot
 \end{lstlisting}
-
-\subsection{Utilisation des BSDJails par Celery}
-Afin de pouvoir envoyer des fichiers dans les jails et effectuer des actions sur ceux-ci, l'utilisateur celery doit à la fois avoir les droits de lecture et écriture dans le dossier des jails, mais également le droit d'intéragir avec celles-ci.
-
-Il est aisé de donner les droits de lecture et d'écriture: il suffit de modifier le propriétaire de \texttt{/home/j} et \texttt{/home/js} pour qu'il soit \texttt{celery}:
-\begin{lstlisting}[language=bash]
-  chown celery:celery /home/j/mroot /home/j/skel
-\end{lstlisting}
-
-Pour avoir le droit d'intéragir avec les jails, il aura fallut modifier le fichier sudoers
-en ajoutant ces lignes grâce à la commande \texttt{visudo}:
-\begin{lstlisting}
-  celery ALL=(ALL) NOPASSWD: /sbin/mount
-  celery ALL=(ALL) NOPASSWD: /sbin/mount_nullfs
-  celery ALL=(ALL) NOPASSWD: /usr/sbin/jail
-  celery ALL=(ALL) NOPASSWD: /sbin/umount
-  celery ALL=(ALL) NOPASSWD: /bin/chflags
-  celery ALL=(ALL) NOPASSWD: /usr/sbin/jexec
-\end{lstlisting}
-Cela fait, les commandes mentionnées pourront être utilisées sans mot de passe par l'utilisateur \texttt{celery}.
 
 \section{Scripts et applications}
 \label{sec:Scripts et applications}
