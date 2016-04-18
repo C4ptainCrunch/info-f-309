@@ -1,0 +1,27 @@
+server {
+    listen 80;
+    server_name hubdoc.be deb.partou.se
+    access_log  /var/log/nginx/hubdoc_access.log;
+    error_log   /var/log/nginx/hubdoc_error.log;
+
+    location / {
+        proxy_pass         http://127.0.0.1:8000;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+
+        client_max_body_size 100M;
+        client_body_timeout 3000s;
+    }
+
+    location /static/  {
+        autoindex    off;
+        alias /var/www/info-f-309/webview/static/;
+    }
+
+    location /media/  {
+        autoindex    off;
+        alias /var/nfs/webview/media/;
+    }
+}

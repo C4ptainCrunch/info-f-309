@@ -131,8 +131,8 @@ Nous avons choisi de partager \texttt{/var/nfs}. Pour cela, il faut le créer et
   chown nobody:nogroup /var/nfs
 \end{lstlisting}
 
-Ensuite il faut éditer \texttt{/etc/exports} puis y ajouter le chemin vers
-le dossier ainsi que les ip des machines autorisées à s'y connecter. (Voir \ref{sub:etc-exports})
+Ensuite il faut éditer \texttt{/etc/exports} (\ref{subs:etc-exports}) puis y ajouter le chemin vers
+le dossier ainsi que les ip des machines autorisées à s'y connecter.
 
 Après avoir édité ce fichier, il faut prévenir le daemon qu'il a changé et démarrer le serveur :
 \begin{lstlisting}[language=bash]
@@ -150,7 +150,7 @@ Pour terminer il faut créer le dossier dans lequel se trouveront les fichiers �
 \subsubsection{\texttt{nginx}}
 
 Nous devons créer un virtualhost \texttt{nginx} pour reverse-proxifier \texttt{gunicorn}.
-Il faut placer \ref{sub:etc-nginx-sa-hubdoc} dans \texttt{/etc/nginx/sites-available/hubdoc.be}
+Il faut éditer \texttt{/etc/nginx/sites-available/hubdoc.be} comme dans l'annexe (\ref{subs:deb-nginx-sites-avail-hubdoc})
 puis créer un lien symbolique dans \texttt{sites-enabled} pour l'acitver et pour finir,
 recharger la configuration :
 \begin{lstlisting}[language=bash]
@@ -174,7 +174,7 @@ Pour finir, redémarrez le service : \texttt{systemctl restart redis-server.serv
 \subsubsection{\texttt{postgesql}}
 
 Il faut autoriser la machine bsd à se connecter à \texttt{postgesql}.
-Pour cela, il faut éditer \texttt{/etc/postgresql/9.4/main/pg\_hba.conf} et rajouter :
+Pour cela, il faut éditer \texttt{/etc/postgresql/9.4/main/pg\_hba.conf} (\ref{subs:deb-pg-hba}) et rajouter :
 \begin{lstlisting}[language=bash]
   host  all  all 146.185.151.186/32  md5
 \end{lstlisting}
@@ -254,7 +254,7 @@ Après, on peut collecter les fichiers statiques et remplir la base de données 
 \end{lstlisting}
 
 Pour finir, il faut installer pui démarrer le service \texttt{systemd} :
-déposez le fichier \ref{etc-systemd-django} dans \texttt{/etc/systemd/system/django.service} puis exécutez :
+déposez le fichier \ref{subs:deb-django-service} dans \texttt{/etc/systemd/system/django.service} puis exécutez :
 \begin{lstlisting}[language=bash]
   systemctl daemon-reload
   systemctl enable django
@@ -324,7 +324,7 @@ On peut ensuite supprimer l'éventuel ancien build, en n'oubliant pas de modifie
   chflags -R noschg /usr/obj
   rm -rf /usr/obj
 \end{lstlisting}
-Afin de minimiser la taille de ce build, il peut être construit en omettant certaines parties du filesystem. Il suffit pour cela d'éditer le fichier \texttt{/etc/src.conf}. Celui-ci est disponible en annexe \ref{sub:etc-src-conf}.
+Afin de minimiser la taille de ce build, il peut être construit en omettant certaines parties du filesystem. Il suffit pour cela d'éditer le fichier \texttt{/etc/src.conf} (\ref{sub:etc-src-conf}).
 Enfin, on peut lancer la compilation de ce build, ce qui peut prendre un certain temps (plus de deux heures en général):
 \begin{lstlisting}[language=bash]
   cd /usr/src
@@ -414,15 +414,15 @@ Puis on démonte tous les dossiers montés et on peut enfin les supprimer.
 
 \subsection{Configuration du NFS}
 \begin{enumerate}
-  \item ajouter ``nfs\_client\_enable="YES"'' dans \texttt{/etc/rc.conf}
+  \item ajouter ``nfs\_client\_enable="YES"'' dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf})
   \item démarrer le service avec \emph{service nfsclient start}
-  \item ajouter la ligne ``192.81.220.4:/var/nfs        /mnt        nfs        rw        0        0'' à \texttt{/etc/fstab}
+  \item ajouter la ligne ``192.81.220.4:/var/nfs        /mnt        nfs        rw        0        0'' à \texttt{/etc/fstab} (\ref{subs:etc-fstab})
   \item remonter le sytème de fichier défini dans le fstab avec \emph{mount -a}
 \end{enumerate}
 
 \subsection{Configuration du NTP}
 \begin{enumerate}
-  \item ajouter ``ntpd\_enable="YES"'' dans \texttt{/etc/rc.conf}
+  \item ajouter ``ntpd\_enable="YES"'' dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf})
   \item démarrer le service avec \emph{service ntpd start}
 \end{enumerate}
 
@@ -458,10 +458,10 @@ Les sources du programme étant sur le site d'hébergement Github, l'user celery
   pip install psycopg2
 \end{lstlisting}
 
-Il faut ensuite ajouter le contenu de \texttt{local\_settings\_bsd.py} dans le fichier \texttt{webview/local\_settings.py}. %TODO: ref
+Il faut ensuite ajouter le contenu de \texttt{local\_settings\_bsd.py} dans le fichier \texttt{webview/local\_settings.py} (\ref{subs:webview-local-settings}).
 On peut maintenant démarrer Celery:
 \begin{enumerate}
-  \item à \texttt{/etc/rc.d/celery} on ajoute le contenu de \texttt{celery-rc.d} %TODO: ref
+  \item à \texttt{rc.d/celery} (\ref{subs:etc-rcd-celery}) on ajoute le contenu de \texttt{celery-rc.d}
   \item à \texttt{/etc/rc.d/celery}, on ajoute les lignes ``celery\_enable="YES"'' et ``celery\_cmd="/home/celery/info-f-309/webview/ve/bin/celery"''
   \item on peut ensuite démarrer le service avec \emph{service celery start}
 \end{enumerate}
@@ -472,7 +472,7 @@ On peut vérifier que celery tourne bien en allant regarder son pid dans \texttt
 \begin{enumerate}
   \item démarrage de freshclam, pour télécharger la base de signatures, avec \emph{service clamav-freshclam onestart}
   \item démarrage du daemon avec \emph{service clamav-clamd onestart}
-  \item ajouter dans \texttt{/etc/rc.conf} les lignes ``clamav\_freshclam\_enable="YES"'' et ``clamav\_clamd\_enable="YES"''
+  \item ajouter dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf}) les lignes ``clamav\_freshclam\_enable="YES"'' et ``clamav\_clamd\_enable="YES"''
 \end{enumerate}
 
 \subsection{Mise à jour}
@@ -538,10 +538,49 @@ Cela fait, les commandes mentionnées pourront être utilisées sans mot de pass
 
 \newpage
 \begin{appendices}
-  \section{Fichiers de configuration}
+  \section{Fichiers de configuration de la machine Debian}
+  \subsubsection{/etc/exports}
+  \label{subs:etc-exports}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/deb-etc-exports}
+
+  \section{Fichiers de configuration de la machine Debian}
+  \subsubsection{/var/www/info-f-309/webview/webview/local\_settings.py}
+  \label{subs:deb-webview-local-settings}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/deb-webview-local-settings.py}
+
+  \subsubsection{/etc/nginx/sites-available/hubdoc.be}
+  \label{subs:deb-nginx-sites-avail-hubdoc}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/deb-nginx-sites-available-hubdoc}
+
+  \subsubsection{/etc/systemd/system/django.service}
+  \label{subs:deb-django-service}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/deb-django.service}
+
+  /subsubsection{/etc/postgresql/9.4/main/pg_hba.conf}
+  \label{subs:deb-pg-hba}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/deb-pg-hba.conf}
+
+  \section{Fichiers de configuration de la machine FreeBSD}
+
   \subsection{/etc/src.conf}
   \label{sub:etc-src-conf}
   \lstinputlisting[basicstyle=\ttfamily]{annexe/etc-src.conf}
+
+  \subsubsection{/etc/rc.conf}
+  \label{subs:etc-rc-conf}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/etc-rc.conf}
+
+  \subsubsection{/etc/fstab}
+  \label{subs:etc-fstab}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/etc-fstab}
+
+  \subsubsection{/etc/rc.d/celery}
+  \label{subs:etc-rcd-celery}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/etc-rcd-celery}
+
+  \subsubsection{/home/celery/info-f-309/webview/webview/local\_settings.py}
+  \label{subs:webview-local-settings}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/webview-local-settings.py}
 \end{appendices}
 
 

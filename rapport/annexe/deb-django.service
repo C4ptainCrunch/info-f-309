@@ -1,0 +1,25 @@
+[Unit]
+Description=Production version of hubdoc.be
+Requires=nginx.service postgresql.service
+Before=nginx.service
+After=postgresql.service
+
+[Service]
+WorkingDirectory=/var/www/info-f-309/webview
+PIDFile=/run/hubdoc_be_django.pid
+Type=forking
+KillMode=process
+Restart=restart-always
+ExecStart=/var/www/info-f-309/webview/ve/bin/gunicorn           \
+          --group www-data                                      \
+          --user www-data                                       \
+          --workers 4                                           \
+          --bind=127.0.0.1:8000                                 \
+          --pid=/run/hubdoc_be_django.pid                       \
+          --pythonpath=/var/www/info-f-309/webview              \
+          --error-logfile=/var/log/hubdoc_be_django.log         \
+          --daemon                                              \
+          webview.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
