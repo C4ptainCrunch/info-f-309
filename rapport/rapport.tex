@@ -298,17 +298,17 @@ Celui-ci est découpé en deux daemons :
         \end{itemize}
 
 \vspace{1em} % wtf latex
-Client \texttt{nfs} : il se connecte à la machine \texttt{debian} et permet à \texttt{Celery} d'avoir accès aux fichiers téléversés sur l'autre machine ainsi qu'à renvoyer les fichiers compilés.
-Commande : \texttt{service nfsclient start/stop} ainsi que \texttt{mount /mnt} et \texttt{umount /mnt}
+Client \texttt{nfs} : il se connecte à la machine Debian et permet à \texttt{Celery} d'avoir accès aux fichiers téléversés sur l'autre machine ainsi qu'à renvoyer les fichiers compilés.
+Commande : \texttt{service nfsclient start/stop} ainsi que \texttt{mount /mnt} et \texttt{umount /mnt}.
 
 \texttt{NTP} : même utilité que sur l'autre machine.
-Commande : \texttt{service start/stop ntpd}
+Commande : \texttt{service start/stop ntpd}.
 
 \subsection{Installation}
-Pour commencer, il a fallu installer quelques paquets avec la commande \emph{pkg}:
+Pour commencer, il a fallu installer les paquets dont nous dépendons avec la commande \emph{pkg}:
 \begin{lstlisting}[language=bash]
   pkg update
-  pkg install bash zsh mosh git nginx python34 vim subversion screen
+  pkg install bash zsh mosh git nginx python34 vim subversion
   pkg install cpdup py34-sqlite3 py27-psycopg2 clamav
 \end{lstlisting}
 
@@ -320,12 +320,14 @@ Il nous faut pour cela mettre à jour les sources FreeBSD situées dans le dossi
   freebsd-update fetch
   freebsd-update install
 \end{lstlisting}
+
 On peut ensuite supprimer l'éventuel ancien build, en n'oubliant pas de modifier les flags des fichiers pour que ceux-ci puissent être modifiés :
 \begin{lstlisting}[language=bash]
   chflags -R noschg /usr/obj
   rm -rf /usr/obj
 \end{lstlisting}
-Afin de minimiser la taille de ce build, il peut être construit en omettant certaines parties du filesystem. Il suffit pour cela d'éditer le fichier \texttt{/etc/src.conf} (\ref{sub:etc-src-conf}).
+
+Afin de minimiser la taille du build, il peut être construit en omettant certaines parties du filesystem. Il suffit pour cela d'éditer le fichier \texttt{/etc/src.conf} (voir \ref{sub:etc-src-conf}).
 Enfin, on peut lancer la compilation de ce build, ce qui peut prendre un certain temps (plus de deux heures en général):
 \begin{lstlisting}[language=bash]
   cd /usr/src
@@ -335,9 +337,10 @@ Enfin, on peut lancer la compilation de ce build, ce qui peut prendre un certain
 À partir de ce build, il a été décidé de créer un modèle pour la création des jails.
 Ce modèle sera en deux parties:
 \begin{itemize}
-  \item la première partie située dans /home/j/mroot qui contiendra la partie commune à toutes ces jails, et qui sera toujours en lecture seule,
-  \item la seconde partie située dans /home/j/skel qui contiendra des dossiers propres à chaque jail et qui seront accessible en lecture-écriture.
+  \item la première partie située dans \texttt{/home/j/mroot} qui contiendra la partie commune à toutes ces jails, et qui sera toujours en lecture seule,
+  \item la seconde partie située dans \texttt{/home/j/skel} qui contiendra des dossiers propres à chaque jail et qui seront accessible en lecture-écriture.
 \end{itemize}
+
 Pour commencer, la première partie va être créée grâce à ces deux commandes:
 \begin{lstlisting}[language=bash]
   cd /usr/src
@@ -347,13 +350,15 @@ Pour commencer, la première partie va être créée grâce à ces deux commande
   # copie les fichiers de configuration dans la jail
   make distribution DESTDIR=/home/j/mroot
 \end{lstlisting}
-Là, le dossier dans DESTDIR contiendra un sous-système dans lequel nous pouvons installer les logiciels nécessaires aux tâches de ces jails, c'est à dire la compilation \LaTeX:
+
+Là, le dossier dans \texttt{DESTDIR} contiendra un sous-système dans lequel nous pouvons installer les logiciels nécessaires aux tâches de ces jails, c'est à dire la compilation \LaTeX:
 \begin{lstlisting}[language=bash]
   chroot /home/j/mroot   # installation des logiciels nécessaires
   pkg update && pkg install texlive-full
   exit
 \end{lstlisting}
-Ensuite, nous allons déplacer les dossiers accessibles en lecture-écriture dans la seconde partie et ajouter des liens symboliques dans le dossier /home/j/mroot/s, où sera monté celle-ci:
+
+Ensuite, nous allons déplacer les dossiers accessibles en lecture-écriture dans la seconde partie et ajouter des liens symboliques dans le dossier \texttt{/home/j/mroot/s}, où sera monté celle-ci:
 \begin{lstlisting}[language=bash]
   mkdir /home/j/skel
   mv /home/j/mroot/etc /home/j/skel
@@ -370,9 +375,9 @@ Ensuite, nous allons déplacer les dossiers accessibles en lecture-écriture dan
 Nous avons dès lors notre modèle pour la création de jails.
 
 Voici maintenant un exemple de création d'une jail, nommée example.
-On commence par créer les dossiers contenant la jail, le premier simplement avec \emph{mkdir},
-le deuxième avec la commande \emph{cpdup}, qui crée une exacte réplique du fichier source.
-On peut ensuite les monter grâce aux commandes \emph{mount\_nullfs} et \emph{mount}.
+On commence par créer les dossiers contenant la jail, le premier simplement avec \texttt{mkdir},
+le deuxième avec la commande \texttt{cpdup}, qui crée une exacte réplique du fichier source.
+On peut ensuite les monter grâce aux commandes \texttt{mount\_nullfs} et \texttt{mount}.
 Cette première commande permet d'accéder à des fichiers depuis différents emplacements.
 
 \begin{lstlisting}[language=bash]
@@ -382,25 +387,25 @@ Cette première commande permet d'accéder à des fichiers depuis différents em
   mount_nullfs -o rw /home/js/example /home/j/example/s
   mount -t devfs /dev /home/j/example/dev
 \end{lstlisting}
-Là, on peut utiliser la commande \emph{jail} afin de lancer une jail:
+Là, on peut utiliser la commande \texttt{jail} afin de lancer une jail:
 \begin{lstlisting}[language=bash]
   jail -c path=/home/j/example name=example persist
 \end{lstlisting}
-"-c" indique que l'on crée une jail, "path" indique l'emplacement de la jail,
-"name" son nom et l'option "persist" garde la jail en route même si celle-ci n'accomplit aucune action.
+\texttt{-c} indique que l'on crée une jail, \texttt{path} indique l'emplacement de la jail,
+\texttt{name} son nom et l'option \texttt{persist} garde la jail en route même si celle-ci n'accomplit aucune action.
 
 Afin d'accéder à cette jail depuis l'extérieur, il suffit d'accéder à l'emplacement où celle-ci se situe.
 Pour lancer une commande à l'intérieur de cette jail,
-on utilise la commande \emph{jexec} dont le premier argument est soit le nom de la jail,
-soit son jid (qui peut être déterminé grâce à la commande \emph{jls}),
+on utilise la commande \texttt{jexec} dont le premier argument est soit le nom de la jail,
+soit son jid (qui peut être déterminé grâce à la commande \texttt{jls}),
 et les autres arguments correspondent à la commande à exécuter.
-Par exemple, pour ajouter un fichier "test.txt" dans la jail depuis l'extérieur et le lister depuis l'intérieur:
+Par exemple, pour ajouter un fichier \texttt{test.txt} dans la jail depuis l'extérieur et le lister depuis l'intérieur:
 \begin{lstlisting}[language=bash]
   touch /home/js/example/home/test.txt
   jexec example ls /home
 \end{lstlisting}
 
-Pour désactiver et supprimer cette jail, il faut tout d'abord la stopper grâce à la commande \emph{jail} à laquelle on passe le flag "-r".
+Pour désactiver et supprimer cette jail, il faut tout d'abord la stopper grâce à la commande \texttt{jail} à laquelle on passe le flag \texttt{-r}.
 Puis on démonte tous les dossiers montés et on peut enfin les supprimer.
 \begin{lstlisting}[language=bash]
   jail -r example
@@ -415,31 +420,33 @@ Puis on démonte tous les dossiers montés et on peut enfin les supprimer.
 
 \subsection{Configuration du NFS}
 \begin{enumerate}
-  \item ajouter ``nfs\_client\_enable="YES"'' dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf})
-  \item démarrer le service avec \emph{service nfsclient start}
-  \item ajouter la ligne ``192.81.220.4:/var/nfs        /mnt        nfs        rw        0        0'' à \texttt{/etc/fstab} (\ref{subs:etc-fstab})
-  \item remonter le sytème de fichier défini dans le fstab avec \emph{mount -a}
+  \item ajouter \texttt{nfs\_client\_enable="YES"} dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf})
+  \item démarrer le service avec \texttt{service nfsclient start}
+  \item ajouter la ligne \texttt{192.81.220.4:/var/nfs        /mnt        nfs        rw        0        0} à \texttt{/etc/fstab} (\ref{subs:etc-fstab})
+  \item remonter le sytème de fichier défini dans le fstab avec \texttt{mount -a}
 \end{enumerate}
 
 \subsection{Configuration du NTP}
 \begin{enumerate}
-  \item ajouter ``ntpd\_enable="YES"'' dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf})
-  \item démarrer le service avec \emph{service ntpd start}
+  \item ajouter \texttt{ntpd\_enable="YES"} dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf})
+  \item démarrer le service avec \texttt{service ntpd start}
 \end{enumerate}
 
 \subsection{Configuration de Celery}
-On commence par créer un user "celery" avec la commande interactive \emph{adduser}:
+On commence par créer un user \texttt{celery} avec la commande interactive \texttt{adduser}:
 \begin{description}
   \item[Username] celery
   \item[Full name] celery
   \item[Shell] bash
   \item[Use password-based authentication?] no
 \end{description}
+
 Celery sera installé dans un environnement virtuel python, nous devons donc nous assurer de disposer des paquets pip et virtualenv:
 \begin{lstlisting}[language=bash]
   sudo python3.4 -m ensurepip # installe pip pour python3.4
   sudo python3.4 -m pip install virtualenv # install virtualenv
 \end{lstlisting}
+
 Il faut ensuite créer des dossiers pour sauvegarder les pid et les logs de Celery:
 \begin{lstlisting}[language=bash]
   sudo mkdir /var/log/celery
@@ -447,6 +454,7 @@ Il faut ensuite créer des dossiers pour sauvegarder les pid et les logs de Cele
   sudo mkdir /var/run/celery
   sudo chown celery:celery /var/run/celery/
 \end{lstlisting}
+
 Les sources du programme étant sur le site d'hébergement Github, l'user celery va cloner le dépôt dans sa home, initialiser un virtualenv et installer les dépendances.
 \begin{lstlisting}[language=bash]
   su celery
@@ -460,20 +468,21 @@ Les sources du programme étant sur le site d'hébergement Github, l'user celery
 \end{lstlisting}
 
 Il faut ensuite ajouter le contenu de \texttt{local\_settings\_bsd.py} dans le fichier \texttt{webview/local\_settings.py} (\ref{subs:webview-local-settings}).
+
 On peut maintenant démarrer Celery:
 \begin{enumerate}
   \item à \texttt{rc.d/celery} (\ref{subs:etc-rcd-celery}) on ajoute le contenu de \texttt{celery-rc.d}
-  \item à \texttt{/etc/rc.d/celery}, on ajoute les lignes ``celery\_enable="YES"'' et ``celery\_cmd="/home/celery/info-f-309/webview/ve/bin/celery"''
-  \item on peut ensuite démarrer le service avec \emph{service celery start}
+  \item à \texttt{/etc/rc.d/celery}, on ajoute les lignes \texttt{celery\_enable="YES"} et\\ \texttt{celery\_cmd="/home/celery/info-f-309/webview/ve/bin/celery"}
+  \item on peut ensuite démarrer le service avec \texttt{service celery start}
 \end{enumerate}
 
 On peut vérifier que celery tourne bien en allant regarder son pid dans \texttt{/var/run/celery/celery.pid}
 
 \subsection{Configuration de ClamAV}
 \begin{enumerate}
-  \item démarrage de freshclam, pour télécharger la base de signatures, avec \emph{service clamav-freshclam onestart}
-  \item démarrage du daemon avec \emph{service clamav-clamd onestart}
-  \item ajouter dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf}) les lignes ``clamav\_freshclam\_enable="YES"'' et ``clamav\_clamd\_enable="YES"''
+  \item démarrage de freshclam, pour télécharger la base de signatures, avec \texttt{service clamav-freshclam onestart}
+  \item démarrage du daemon avec \texttt{service clamav-clamd onestart}
+  \item ajouter dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf}) les lignes \texttt{clamav\_freshclam\_enable="YES"} et\\ \texttt{clamav\_clamd\_enable="YES"}
 \end{enumerate}
 
 \subsection{Mise à jour}
@@ -487,7 +496,7 @@ en tant que \texttt{celery} il faut exécuter \texttt{git pull}
 epuis le dossier \texttt{/home/celery/info-f-309}
 et ensuite en tant que \texttt{root} exécuter \texttt{service restart celery}.
 
-Pour mettre à jour le modèle des jails, il faut tout d'abord mettre à jour le serveur comme expliqué ci-dessus et refaire un buildworld comme expliqué plus-haut (\ref{subs:Contrôle des BSDJails}). On crée ensuite un dossier et on y installe un le nouveau modèle.
+Pour mettre à jour le modèle des jails, il faut tout d'abord mettre à jour le serveur comme expliqué ci-dessus et refaire un buildworld comme expliqué plus-haut (\ref{subs:Contrôle des BSDJails}). On crée ensuite un dossier et on y installe un le nouveau modèle :
 \begin{lstlisting}[language=bash]
   mkdir /home/j/mroot2
   cd /usr/src
@@ -497,7 +506,7 @@ Pour mettre à jour le modèle des jails, il faut tout d'abord mettre à jour le
   cpdup /usr/src usr/src
   mkdir s
 \end{lstlisting}
-Certains des nouveaux dossiers installés seront inutiles, puisqu'ils existeront déjà dans \texttt{/home/j/skel}. Il faudra également réinstaller la distribution \LaTeX.
+Certains des nouveaux dossiers installés seront inutiles, puisqu'ils existeront déjà dans \texttt{/home/j/skel}. Il faudra également réinstaller la distribution \LaTeX :
 \begin{lstlisting}[language=bash]
   chroot /home/j/mroot2
   pkg update && pkg install texlive-full
@@ -519,13 +528,13 @@ Il faut ensuite s'assurer que plus aucune jail ne tourne. Si c'est le cas, on pe
 \subsection{Utilisation des BSDJails par Celery}
 Afin de pouvoir envoyer des fichiers dans les jails et effectuer des actions sur ceux-ci, l'utilisateur celery doit à la fois avoir les droits de lecture et écriture dans le dossier des jails, mais également le droit d'intéragir avec celles-ci.
 
-Il est aisé de donner les droits de lecture et d'écriture: il suffit de modifier le propriétaire de /home/j et /home/js pour qu'il soit celery:
+Il est aisé de donner les droits de lecture et d'écriture: il suffit de modifier le propriétaire de \texttt{/home/j} et \texttt{/home/js} pour qu'il soit \texttt{celery}:
 \begin{lstlisting}[language=bash]
   chown celery:celery /home/j/mroot /home/j/skel
 \end{lstlisting}
 
 Pour avoir le droit d'intéragir avec les jails, il aura fallut modifier le fichier sudoers
-en ajoutant ces lignes grâce à la commande \emph{visudo}:
+en ajoutant ces lignes grâce à la commande \texttt{visudo}:
 \begin{lstlisting}
   celery ALL=(ALL) NOPASSWD: /sbin/mount
   celery ALL=(ALL) NOPASSWD: /sbin/mount_nullfs
@@ -534,7 +543,7 @@ en ajoutant ces lignes grâce à la commande \emph{visudo}:
   celery ALL=(ALL) NOPASSWD: /bin/chflags
   celery ALL=(ALL) NOPASSWD: /usr/sbin/jexec
 \end{lstlisting}
-Cela fait, les commandes mentionnées pourront être utilisées sans mot de passe par l'utilisateur celery
+Cela fait, les commandes mentionnées pourront être utilisées sans mot de passe par l'utilisateur \texttt{celery}.
 
 
 \newpage
