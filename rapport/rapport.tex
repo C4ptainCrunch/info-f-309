@@ -6,6 +6,7 @@
 \usepackage{eurosym}
 \usepackage{listings}
 \usepackage{color}
+\usepackage{graphicx}
 \usepackage[titletoc,toc,title]{appendix}
 
 \author{Anthony \textsc{Caccia} \and Romain \textsc{Fontaine} \and Nikita \textsc{Marchant} }
@@ -59,12 +60,23 @@ Puis, à la réception de ce document, le serveur enverra les sources dans une B
 
 Deux machines ont été déployées: une première machine sur laquelle tourne la distribution GNU/Linux Debian, et une deuxième qui a pour système d'exploitation la distribution FreeBSD.
 
-La première machine a pour tâche la mise en service de l'interface web,
+La première machine a pour tâche la mise en service de l'interface web
+(voir les figures \ref{app1} et \ref{app2}),
 le stockage des fichiers \texttt{zip} et \texttt{pdf}
 ainsi que l'envoi des ordres de compilation sur la seconde machine.
 
 La seconde machine reçoit les ordres de compilation, crée des BSDJails à la volée, y place les sources récupérées sur la première machine,
 y lance les compilations et l'analyse antivirus et renvoie le document pdf final à la première machine.
+
+\begin{figure}[h]
+   \includegraphics[scale=0.4]{hubdoc.png}
+   \caption{\label{app1} Application web - Page d'accueil}
+\end{figure}
+
+\begin{figure}[!h]
+   \includegraphics[scale=0.4]{hubdoc-upload.png}
+   \caption{\label{app2} Application web - Page de téléversement}
+\end{figure}
 
 \section{Choix effectués}
 \label{sec:Choix effectués}
