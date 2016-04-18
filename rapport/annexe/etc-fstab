@@ -1,0 +1,9 @@
+#
+# /etc/fstab: static file system information
+#
+# <file system>	<dir>	<type>	<options>	<dump>	<pass>
+
+/dev/gpt/rootfs   /       ufs     rw      1       1
+/dev/gpt/swapfs  none    swap    sw      0       0
+fdesc   /dev/fd         fdescfs         rw      0       0
+192.81.220.4:/var/nfs   /mnt    nfs     rw      0       0

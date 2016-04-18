@@ -210,7 +210,7 @@ On peut ensuite supprimer l'éventuel ancien build, en n'oubliant pas de modifie
   chflags -R noschg /usr/obj
   rm -rf /usr/obj
 \end{lstlisting}
-Afin de minimiser la taille de ce build, il peut être construit en omettant certaines parties du filesystem. Il suffit pour cela d'éditer le fichier \texttt{/etc/src.conf}. Celui-ci est disponible en annexe \ref{sub:etc-src-conf}.
+Afin de minimiser la taille de ce build, il peut être construit en omettant certaines parties du filesystem. Il suffit pour cela d'éditer le fichier \texttt{/etc/src.conf} (\ref{sub:etc-src-conf}).
 Enfin, on peut lancer la compilation de ce build, ce qui peut prendre un certain temps (plus de deux heures en général):
 \begin{lstlisting}[language=bash]
   cd /usr/src
@@ -302,7 +302,7 @@ Puis on démonte tous les dossiers montés et on peut enfin les supprimer.
 \begin{enumerate}
   \item ajouter ``nfs\_client\_enable="YES"'' dans \texttt{/etc/rc.conf} (\ref{subs:etc-rc-conf})
   \item démarrer le service avec \emph{service nfsclient start}
-  \item ajouter la ligne ``192.81.220.4:/var/nfs        /mnt        nfs        rw        0        0'' à \texttt{/etc/fstab}
+  \item ajouter la ligne ``192.81.220.4:/var/nfs        /mnt        nfs        rw        0        0'' à \texttt{/etc/fstab} (\ref{subs:etc-fstab})
   \item remonter le sytème de fichier défini dans le fstab avec \emph{mount -a}
 \end{enumerate}
 
@@ -344,10 +344,10 @@ Les sources du programme étant sur le site d'hébergement Github, l'user celery
   pip install psycopg2
 \end{lstlisting}
 
-Il faut ensuite ajouter le contenu de \texttt{local\_settings\_bsd.py} dans le fichier \texttt{webview/local\_settings.py}. %TODO: ref
+Il faut ensuite ajouter le contenu de \texttt{local\_settings\_bsd.py} dans le fichier \texttt{webview/local\_settings.py} (\ref{subs:webview-local-settings}).
 On peut maintenant démarrer Celery:
 \begin{enumerate}
-  \item à \texttt{/etc/rc.d/celery} on ajoute le contenu de \texttt{celery-rc.d} %TODO: ref
+  \item à \texttt{rc.d/celery} (\ref{subs:etc-rcd-celery}) on ajoute le contenu de \texttt{celery-rc.d}
   \item à \texttt{/etc/rc.d/celery}, on ajoute les lignes ``celery\_enable="YES"'' et ``celery\_cmd="/home/celery/info-f-309/webview/ve/bin/celery"''
   \item on peut ensuite démarrer le service avec \emph{service celery start}
 \end{enumerate}
@@ -434,6 +434,17 @@ Cela fait, les commandes mentionnées pourront être utilisées sans mot de pass
   \label{subs:etc-rc-conf}
   \lstinputlisting[basicstyle=\ttfamily]{annexe/etc-rc.conf}
 
+  \subsubsection{/etc/fstab}
+  \label{subs:etc-fstab}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/etc-fstab}
+
+  \subsubsection{/etc/rc.d/celery}
+  \label{subs:etc-rcd-celery}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/etc-rcd-celery}
+
+  \subsubsection{/home/celery/info-f-309/webview/webview/local\_settings.py}
+  \label{subs:webview-local-settings}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/webview-local-settings.py}
 \end{appendices}
 
 
