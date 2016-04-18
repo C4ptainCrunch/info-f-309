@@ -87,7 +87,8 @@ Il sert une unique base de données : \texttt{webview} qui est utilisée par l'a
 Il écoute en local sur un socket UNIX ansi que sur l'interface publique (retreinte par le firewall) sur le port \texttt{5432}.
 Commande : \texttt{systemctl start/stop/status nginx.service}
 
-\texttt{Redis} est utilisé comme message broker entre \texttt{Celery} et l'application web. Celui-ci écoute sur toutes les interfaces sur le port \texttt{6379} et demande un mot de passe.
+\texttt{Redis} est utilisé comme message broker entre \texttt{Celery} et l'application web.
+Celui-ci écoute sur toutes les interfaces (l'interface publique est restreinte par le firewall) sur le port \texttt{6379} et demande un mot de passe.
 Commande : \texttt{systemctl start/stop/status redis-server.service}
 
 \texttt{Django} : C'est un processus \texttt{gunicorn} qui sert l'application web sur le port \texttt{8000} sur \texttt{localhost}.
@@ -104,6 +105,48 @@ Commande : \texttt{systemctl start/stop/status ntp.service}
 
 
 \subsection{Procédure d'installation}
+
+Premièrement, il faut installer tous les paquets dont nous avons besoin :
+\begin{lstlisting}[language=bash]
+  apt-get update
+  apt-get install git sudo zsh python3 nginx htop mosh nfs-kernel-server vim redis-server postgresql-server python3 python3-dev ntpdate ntp screen iptables-persistent
+\end{lstlisting}
+
+\subsubsection{\texttt{nfs}}
+
+Nous avons choisi de partager \texttt{/var/nfs}. Pour cela, il faut le créer et lui donner les bonnes permissions :
+
+\begin{lstlisting}[language=bash]
+  mkdir /var/nfs
+  chown nobody:nogroup /var/nfs
+\end{lstlisting}
+
+Ensuite il faut éditer \texttt{/etc/exports} puis y ajouter le chemin vers
+le dossier ainsi que les ip des machines autorisées à s'y connecter. (Voir \ref{sub:etc-exports})
+
+Après avoir éditer ce fichier, il faut prévenir le daemon qu'il a changé et démarrer le serveur :
+\begin{lstlisting}[language=bash]
+  exportfs -a
+  systemctl enable nfs-kernel-server
+  systemctl start nfs-kernel-server
+\end{lstlisting}
+
+Pour terminer il faut créer le dossier dans lequel se trouveront les fichiers à partager :
+\begin{lstlisting}[language=bash]
+  mkdir -p /var/nfs/webview/media
+  chown www-data:www-data /var/nfs/webview/
+\end{lstlisting}
+
+\subsubsection{\texttt{nginx}}
+
+Nous devons créer un virtualhost \texttt{nginx} pour reverse-proxifier \texttt{gunicorn}.
+Il faut placer \ref{sub:etc-nginx-sa-hubdoc} dans \texttt{/etc/nginx/sites-available/hubdoc.be}
+puis créer un lien symbolique dans \texttt{sites-enabled} pour l'acitver et pour finir,
+recharger la configuration :
+\begin{lstlisting}[language=bash]
+  ln -s /etc/nginx/sites-available/hubdoc.be /etc/nginx/sites-enabled/
+  systemctl reload nginx
+\end{lstlisting}
 
 \subsection{Mise à jour}
 
