@@ -92,7 +92,7 @@ Celui-ci écoute sur toutes les interfaces (l'interface publique est restreinte 
 Commande : \texttt{systemctl start/stop/status redis-server.service}
 
 \texttt{Django} : C'est un processus \texttt{gunicorn} qui sert l'application web sur le port \texttt{8000} sur \texttt{localhost}.
-Commande : \texttt{systemctl start/stop/status django.service}
+Commande : \texttt{systemctl start/stop/status django.service} \ref{subs:deb-django-service}
 
 Serveur \texttt{nfs} : le répertoire \texttt{/var/nfs} est partagé avec la machine BSD via \texttt{nfs}.
 Dans celui-ci se trouve \texttt{/var/nfs/webview/media} dans lequel est stocké tous les fichiers media de Django (principalement les fichiers \texttt{zip} et \texttt{pdf}).
@@ -437,6 +437,10 @@ Cela fait, les commandes mentionnées pourront être utilisées sans mot de pass
   \subsubsection{/etc/nginx/sites-available/hubdoc.be}
   \label{subs:deb-nginx-sites-avail-hubdoc}
   \lstinputlisting[basicstyle=\ttfamily]{annexe/deb-nginx-sites-available-hubdoc}
+
+  \subsubsection{/etc/systemd/system/django.service}
+  \label{subs:deb-django-service}
+  \lstinputlisting[basicstyle=\ttfamily]{annexe/deb-django.service}
 
   \section{Fichiers de configuration de la machine FreeBSD}
 
