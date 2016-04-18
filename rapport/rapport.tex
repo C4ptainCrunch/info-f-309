@@ -180,8 +180,27 @@ Pour la créer, il faut exécuter en tant que \texttt{postgres} :
 \end{lstlisting}
 
 \subsubsection{\texttt{iptables}}
+\paragraph{\texttt{Redis}}
+\begin{lstlisting}[language=bash]
+	iptables -A INPUT -p tcp --destination-port 6379 -j DROP
+	ip6tables -A INPUT -p tcp --destination-port 6379 -j DROP
+	iptables -I INPUT -p tcp -s 127.0.0.1 --dport 6379 -j ACCEPT
+	iptables -I INPUT -p tcp -s 146.185.151.186 --dport 6379 -j ACCEPT
+\end{lstlisting}
 
-...
+\paragraph{\texttt{Postgresql}}
+\begin{lstlisting}[language=bash]
+	iptables -A INPUT -p tcp --destination-port 5432 -j DROP
+	ip6tables -A INPUT -p tcp --destination-port 5432 -j DROP
+	iptables -I INPUT -p tcp -s 127.0.0.1 --dport 5432 -j ACCEPT
+	iptables -I INPUT -p tcp -s 146.185.151.186 --dport 5432 -j ACCEPT
+\end{lstlisting}
+
+\paragraph{Persistance}
+\begin{lstlisting}[language=bash]
+	iptables-save > /etc/iptables/rules.v4
+	ip6tables-save > /etc/iptables/rules.v6
+\end{lstlisting}
 
 \subsubsection{\texttt{Django}}
 
