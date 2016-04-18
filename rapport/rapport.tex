@@ -536,6 +536,16 @@ en ajoutant ces lignes grâce à la commande \emph{visudo}:
 \end{lstlisting}
 Cela fait, les commandes mentionnées pourront être utilisées sans mot de passe par l'utilisateur celery
 
+\section{Scripts et applications}
+\label{sec:Scripts et applications}
+
+\subsection{Application web Django}
+Une application web a été réalisée avec le framework django. Ses sources sont disponibles sur \url{https://github.com/C4ptainCrunch/info-f-309}. La partie la plus intéressante se situe dans \texttt{info-f-309/webview/documents/tasks.py}, qui contient le code des tâches effectuées avec Celery.
+\lstinputlisting[basicstyle=\ttfamily, language=python]{../webview/documents/tasks.py}
+
+\subsubsection{Utilisation des BSDJails pour la compilation \LaTeX}
+Ce script écrit en bash prend en argument un nom pour la jail et le chemin vers l'archive contenant les sources \LaTeX.
+\lstinputlisting[basicstyle=\ttfamily, language=bash]{../scripts/jailifier.sh}
 
 \newpage
 \begin{appendices}

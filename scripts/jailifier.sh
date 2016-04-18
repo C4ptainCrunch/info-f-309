@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
-#Usage: jailifier.sh netid zip_archive
+#Usage: jailifier.sh jailId zip_archive
 
 J=/home/j
 JS=/home/js
