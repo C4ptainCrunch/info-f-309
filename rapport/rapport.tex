@@ -78,14 +78,6 @@ y lance les compilations et l'analyse antivirus et renvoie le document pdf final
    \caption{\label{app2} Application web - Page de téléversement}
 \end{figure}
 
-\section{Choix effectués}
-\label{sec:Choix effectués}
-
-Le partage des fichiers entre les deux serveurs est géré par la mise en place d'un protocole NFS.
-
-L'application web est réalisée grâce au framework Django pour Python 3.
-%TODO
-
 \section{Serveur web (Machine Debian)}
 \subsection{Services}
 Les services suivants tournent sur le premier serveur :
@@ -107,16 +99,17 @@ Commande : \texttt{systemctl start/stop/status redis-server.service}
 Commande : \texttt{systemctl start/stop/status django.service}
 
 Serveur \texttt{nfs} : le répertoire \texttt{/var/nfs} est partagé avec la machine BSD via \texttt{nfs}.
-Dans celui-ci se trouve \texttt{/var/nfs/webview/media} dans lequel est stocké tous les fichiers media de Django (principalement les fichiers \texttt{zip} et \texttt{pdf}).
+Dans celui-ci se trouve \texttt{/var/nfs/webview/media} dans lequel sont stockés tous les fichiers media de Django (principalement les fichiers \texttt{zip} et \texttt{pdf}).
+Commande : \texttt{systemctl start/stop/status nfs-kernel-server.service}
 
 \texttt{NTP} : vu que nous travaillons sur plusieurs machines en parralèlle, il est indispensable d'avoir la même heure partout.
 C'est le travail de \texttt{NTP}.
 Commande : \texttt{systemctl start/stop/status ntp.service}
 
-\texttt{iptables} : il sert de firewall pour les différents services devant être ouvert publiquement sur internet.
-Il protège le serveur Redis et le serveur Postgresql.
-Les commandes a utiliser pour ajouter des nouvelles règles sont \texttt{iptables} et \texttt{ip6tables}.
-Après cela, on utilise iptables-persistent pour conserver les règles après chaque reboot. Pour se faire il suffit de \texttt{iptables-save > /etc/iptables/rules.v4} et \texttt{ip6tables-save > /etc/iptables/rules.v6}.
+\texttt{iptables} : il sert de firewall pour les différents services qui écoutent sur l'interface publique.
+Il protège le serveur Redis et le serveur Postgresql en limitant les connexions à celles venant de l'ip de la machine bsd.
+Les commandes à utiliser pour ajouter des nouvelles règles sont \texttt{iptables} et \texttt{ip6tables}.
+Après cela, on utilise \texttt{iptables-persistent} pour conserver les règles après chaque reboot. Pour se faire il suffit d'exécuter \texttt{iptables-save > /etc/iptables/rules.v4} et \texttt{ip6tables-save > /etc/iptables/rules.v6}.
 
 
 \subsection{Procédure d'installation}
