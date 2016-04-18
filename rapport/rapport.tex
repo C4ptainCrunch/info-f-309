@@ -165,7 +165,15 @@ Pour finir, redémarrez le service : \texttt{systemctl restart redis-server.serv
 
 \subsubsection{\texttt{postgesql}}
 
-Cette application a besoin d'une base de données. Pour la créer, il faut exécuter en tant que \texttt{postgres} :
+    dans /etc/postgresql/9.4/main/pg_hba.conf ajouter la ligne:
+        host    all             all             146.185.151.186/32            md5
+        (en deessous de: host    all             all             127.0.0.1/32            md5)
+    dans vim /etc/postgresql/9.4/main/postgresql.conf:
+        changer #listen_addresses = 'localhost' par listen_addresses = '*'
+    systemctl restart postgresql
+
+\texttt{Django} a besoin d'une base de données.
+Pour la créer, il faut exécuter en tant que \texttt{postgres} :
 \begin{lstlisting}[language=bash]
   createuser -P www-data # assignez un mot de passe à l'utilisteur
   createdb -O www-data webbview
